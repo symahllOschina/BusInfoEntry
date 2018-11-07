@@ -1,0 +1,276 @@
+package com.wdkj.dkhdl.photo.util;
+
+import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
+
+
+import com.wdkj.dkhdl.BuildConfig;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+/**
+ * 获取照片工具类（兼容6.0，7.0，8.0）
+ */
+public class PhotoModule {
+
+    private Context context;
+
+    public static final int REQUEST_CODE_CROP_PHOTO = 0x1001;//相册
+    public static final int REQUEST_CODE_CAMERA = 0x1002;//拍照
+    public static final int CROP_RESULT_CODE = 0x1003;//裁剪返回
+
+
+
+    private static final String PHOTO_NAME = "photo.jpg";
+
+    public static final String imgName = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA)
+            .format(new Date())+"img";
+
+    // 裁剪属性 cropIntent.putExtra("return-data", false); 时，使用自定义接收图片的Uri
+    private static final String IMAGE_FILE_LOCATION = "file:///" + Environment.getExternalStorageDirectory().getPath() + "/temp.jpg";
+    public Uri imageUri = Uri.parse(IMAGE_FILE_LOCATION);
+    public File file;//拍照返回文件
+    /**
+     * outputUri该变量比较重要，它的值是最终裁剪返回图片的Uri地址，所以这里定义为public,方便调用，但不能是static的
+     */
+    public Uri outputUri;
+    public String imagePath;
+
+    public PhotoModule(Context context) {
+        this.context = context;
+    }
+
+    /**
+     * 获取刚保存的缓存图片路径(即裁剪后的)
+     */
+    public String getTempPhotoPath() {
+        String filePath = context.getExternalCacheDir() + File.separator + PHOTO_NAME;
+        return filePath;
+    }
+
+    /**
+     * 获取保存的缓存图片直接转成File
+     */
+    public File getTempPhoto() {
+        File file = new File(context.getExternalCacheDir() + File.separator + PHOTO_NAME);
+        return file;
+    }
+
+
+
+
+    /**
+     * 保存缓存图片
+     *
+     * @param bitmap
+     */
+    public void savePhoto(Bitmap bitmap) {
+        File file = new File(context.getExternalCacheDir() + File.separator + PHOTO_NAME);
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取缓存图片
+     *
+     * @return
+     */
+    public Bitmap getPhoto() {
+        File file = new File(context.getExternalCacheDir() + File.separator + PHOTO_NAME);
+        if (!file.exists()) {
+            return null;
+        } else {
+            Bitmap bitmap = BitmapFactory.decodeFile(context.getExternalCacheDir() + File.separator + PHOTO_NAME);
+            return bitmap;
+        }
+    }
+
+    /**
+     * 获取照片
+     *
+     * @param request_code
+     */
+    public void takePhoto(int request_code) {
+        if(isInstallSDK()){
+            if(request_code == REQUEST_CODE_CROP_PHOTO)
+            {
+                //打开相册
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
+                ((Activity) context).startActivityForResult(intent,REQUEST_CODE_CROP_PHOTO);
+
+
+            }else if(request_code == REQUEST_CODE_CAMERA)
+            {
+                //启动相机拍照
+                Intent intent = new Intent();
+                file = new FileStorage().createCropFile();
+                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N){
+                    try {
+                        //Android7.0以上版本文件路径访问设置（与AndroidManifest.xml文件中provider节点设置保持一致）
+                        imageUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID+".myprovider",file);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        imageUri = Uri.fromFile(file);
+                    }
+
+                }else{
+                    imageUri = Uri.fromFile(file);
+
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N){
+                        //如果是7.0版本，必须加上该intent
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+                }
+                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                ((Activity) context).startActivityForResult(intent,REQUEST_CODE_CAMERA);
+
+
+            }
+        }else{
+            //SD卡不存在
+        }
+    }
+
+    /**
+     *
+     */
+    public void handleImageOnKitKat(Intent data){
+        imagePath = null;
+        imageUri = data.getData();
+        if(DocumentsContract.isDocumentUri(context,imageUri)){
+            String docId = DocumentsContract.getDocumentId(imageUri);
+            if(imageUri.getAuthority().equals("com.android.providers.media.documents")){
+                String id = docId.split(":")[1];
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);
+            }else if(imageUri.getAuthority().equals("com.android.downloads.documents")){
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),Long.valueOf(docId));
+                imagePath = getImagePath(contentUri,null);
+            }
+
+        }else if(imageUri.getScheme().equals("content")){
+            imagePath = getImagePath(imageUri,null);
+        }else if(imageUri.getScheme().equals("file")){
+            imagePath = imageUri.getPath();
+        }
+        //裁剪图片
+//        cropPhoto();
+    }
+
+    public void handleImageBeforeKitKat(Intent data){
+        imageUri = data.getData();
+        imagePath = getImagePath(imageUri,null);
+        //裁剪图片
+//        cropPhoto();
+    }
+
+    /**
+     * 裁剪图片 （证件照等裁剪不清晰）
+
+    public void cropPhoto(){
+        File file = new FileStorage().createCropFile();
+        outputUri = Uri.fromFile(file);
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            //android7.0
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        intent.setDataAndType(imageUri,"image/*");
+        intent.putExtra("crop","true");
+        intent.putExtra("aspectX",1);
+        intent.putExtra("aspectY",1);
+        intent.putExtra("scale",true);
+        /**
+         * return-data
+         * 这个属性决定我们在 onActivityResult 中接收到的是什么数据，
+         * 如果设置为true 那么data将会返回一个bitmap
+         * 如果设置为false，则会将图片保存到本地并将对应的uri返回，当然这个uri得有我们自己设定。
+         * 系统裁剪完成后将会将裁剪完成的图片保存在我们所这设定这个uri地址上。我们只需要在裁剪完成后直接调用该uri来设置图片，就可以了。
+
+        intent.putExtra("return-data",false);
+        // 当 return-data 为 false 的时候需要设置这句,如果为true时注释掉
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,outputUri);
+        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        intent.putExtra("noFaceDetection",true);
+        intent.putExtra("outputX",300);
+        intent.putExtra("outputY",300);
+        ((Activity) context).startActivityForResult(intent,CROP_RESULT_CODE);
+    }
+
+     */
+
+    /**
+     * 获取文件路径
+     */
+    private String getImagePath(Uri uri,String selection){
+        Cursor cursor = context.getContentResolver().query(uri,null,selection,null,null);
+        if(cursor != null){
+            if(cursor.moveToFirst()){
+                return cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            }
+        }
+        cursor.close();
+        return "";
+    }
+
+    /**
+     * 判断SD卡是否存在
+     */
+    public boolean isInstallSDK(){
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            //存在
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 解决Android8.0版本拍照后不调用裁剪功能时直接获取文件时为空
+     * 拍照返回不裁剪时直接拿到拍照图片文件 */
+    public File getCameraFile(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri contentUri = Uri.fromFile(file);
+            String path = contentUri.getPath();
+            Log.e("PhotoModule", contentUri.toString());
+            //文件的路径
+            String absolutePath = file.getAbsolutePath();
+            //文件的名字
+            String parent = file.getName();
+            Log.e("PhotoModule", parent + "===" + absolutePath);
+            mediaScanIntent.setData(contentUri);
+            context.sendBroadcast(mediaScanIntent);
+
+            return file;
+
+        }
+
+        return null;
+    }
+}

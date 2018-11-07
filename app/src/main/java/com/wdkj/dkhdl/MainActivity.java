@@ -1,0 +1,491 @@
+package com.wdkj.dkhdl;
+
+import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.wdkj.dkhdl.bean.UserBean;
+import com.wdkj.dkhdl.home.MainHomeFragment;
+import com.wdkj.dkhdl.my.MainMyFragment;
+import com.wdkj.dkhdl.utils.JumpPermissionManagement;
+import com.wdkj.dkhdl.utils.MySerialize;
+import com.wdkj.dkhdl.utils.NitConfig;
+import com.wdkj.dkhdl.utils.ToastUtil;
+import com.wdkj.dkhdl.utils.Utils;
+import com.wdkj.dkhdl.version.util.DownLoadAsyncTask;
+import com.wdkj.dkhdl.version.util.HttpURLConUtil;
+import com.wdkj.dkhdl.version.util.UpdateInfo;
+import com.wdkj.dkhdl.version.util.UpdateUrl;
+import com.yanzhenjie.permission.Action;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.Permission;
+import com.yanzhenjie.permission.Rationale;
+import com.yanzhenjie.permission.RequestExecutor;
+import com.yanzhenjie.permission.Setting;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends BaseActivity implements View.OnClickListener{
+
+    private Context context;
+
+    private RelativeLayout homeLayout,myLayout;//首页,我的
+    private ImageView homeImg,myImg;
+    private TextView homeText,myText;
+
+    int tabIndex = 0;
+
+    private List<Fragment> fragmentList = new ArrayList<Fragment>();
+    MainHomeFragment homeFragment;
+    MainMyFragment myFragment;
+
+    public static UserBean userBean;
+    private UpdateInfo info;
+    private Dialog mDialog;
+    private static final int REQUEST_CODE = 10086;
+    private static final int REQUEST_PERMISSION = 0;//动态权限注册请求码
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        context = MainActivity.this;
+        setContentView(R.layout.activity_main);
+
+        registerPermission();
+        initData();
+        initView();
+        initListener();
+        initFragments();
+
+
+        checkNetwork();
+        /**
+         * 比对版本号/读取更新信息/下载APK/安装
+         */
+        CheckVersionTask();
+    }
+
+    /** 初始化控件 */
+    private void initView(){
+        homeLayout = findViewById(R.id.main_tab_homeLayout);
+        myLayout = findViewById(R.id.main_tab_myLayout);
+        homeImg = findViewById(R.id.main_tab_homeImg);
+        myImg = findViewById(R.id.main_tab_myImg);
+        homeText = findViewById(R.id.main_tab_homeText);
+        myText = findViewById(R.id.main_tab_myText);
+    }
+
+    private void initListener(){
+        //注册tab点击时间
+        homeLayout.setOnClickListener(this);
+        myLayout.setOnClickListener(this);
+    }
+
+    private void initData(){
+        //取出对象
+        try {
+            userBean=(UserBean) MySerialize.deSerialization(MySerialize.getObject("user", this));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void initFragments() {
+        homeFragment = new MainHomeFragment();
+        myFragment = new MainMyFragment(userBean);
+        fragmentList.add(homeFragment);
+        fragmentList.add(myFragment);
+        for (Fragment fragment : fragmentList) {
+            addFragment(fragment);
+        }
+        //初始化加载项
+        int tabIndex = getIntent().getIntExtra("tabIndex", 0);
+        changeHomeTab(tabIndex);
+        homeImg.setImageDrawable(getResources().getDrawable(R.drawable.main_home_checd_icon));
+        homeText.setTextColor(getResources().getColor(R.color.blue_409EFF));
+    }
+
+    private void addFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().add(R.id.main_content_frame, fragment).commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
+
+    private void hideFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().hide(fragment).commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
+
+    private void showFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().show(fragment).commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
+
+    public void changeHomeTab(int index) {
+//        setTitle(titleList.get(index));
+        for (int i = 0; i < fragmentList.size(); i++) {
+            if (i == index) {
+                showFragment(fragmentList.get(i));
+            } else {
+                hideFragment(fragmentList.get(i));
+            }
+        }
+    }
+
+    /**
+     * 初始化所有tab
+     */
+    private void resetImg(){
+        homeImg.setImageDrawable(getResources().getDrawable(R.drawable.main_home_nochecd_icon));
+        homeText.setTextColor(getResources().getColor(R.color.gray_9a9a9a));
+        myImg.setImageDrawable(getResources().getDrawable(R.drawable.main_my_nochecd_icon));
+        myText.setTextColor(getResources().getColor(R.color.gray_9a9a9a));
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.main_tab_homeLayout:
+                tabIndex = 0;
+                //先初始化所有Tab
+                resetImg();
+                homeImg.setImageDrawable(getResources().getDrawable(R.drawable.main_home_checd_icon));
+                homeText.setTextColor(getResources().getColor(R.color.blue_409EFF));
+                break;
+            case R.id.main_tab_myLayout:
+                tabIndex = 1;
+                //先初始化所有Tab
+                resetImg();
+                myImg.setImageDrawable(getResources().getDrawable(R.drawable.main_my_checd_icon));
+                myText.setTextColor(getResources().getColor(R.color.blue_409EFF));
+                break;
+        }
+        changeHomeTab(tabIndex);
+
+    }
+
+    /*
+     * 从服务器获取xml解析并进行版本号比对
+     */
+    private void CheckVersionTask(){
+
+
+        new Thread(){
+            public void run() {
+
+                String versionName = "";
+                try {
+                    versionName = Utils.getVersionName(context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //获取服务器保存版本信息的路径
+                String path = "";
+                if(NitConfig.isFormal){
+                    path = UpdateUrl.url;
+                    Log.e("更新版本地址：","生产环境-----");
+                }else{
+                    path = UpdateUrl.testUrl;
+                    Log.e("更新版本地址：","测试环境-----");
+                }
+
+                //解析xml文件封装成对象
+                info =  HttpURLConUtil.getUpdateInfo(path);
+                Log.i(TAG,"版本号为："+info.getVersion());
+                Log.i(TAG,"下载路径为："+info.getUrl());
+                String xmlVersionName = info.getVersion();
+                if(xmlVersionName.equals(versionName)){
+                    Log.i(TAG,"版本号相同无需升级");
+
+                }else{
+                    Log.i(TAG,"版本号不同 ,提示用户升级 ");
+                    Message msg = new Message();
+                    msg.what = 1;
+                    handler.sendMessage(msg);
+                }
+
+            };
+
+        }.start();
+
+    }
+
+    private void sendMessage(int what,String text){
+        Message msg = new Message();
+        msg.what = what;
+        msg.obj = text;
+        handler.sendMessage(msg);
+    }
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    //对话框提示用户升级程序
+                    showUpdateDialog();
+                    break;
+                case 2://安装新版本
+                    installApk();
+                    break;
+
+            }
+        }
+    };
+
+
+    /**
+     * Android6.0动态注册权限
+     */
+    private void registerPermission(){
+        /**
+         *默认安装禁止SD卡的读写权限，以下方式打开权限
+         */
+        try {
+            PackageManager pkgManager = getPackageManager();
+
+            // 读写 sd card 权限非常重要, android6.0默认禁止的, 建议初始化之前就弹窗让用户赋予该权限
+            boolean sdCardWritePermission =
+                    pkgManager.checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, getPackageName()) == PackageManager.PERMISSION_GRANTED;
+
+            // read phone state用于获取 imei 设备信息
+            boolean phoneSatePermission =
+                    pkgManager.checkPermission(Manifest.permission.READ_PHONE_STATE, getPackageName()) == PackageManager.PERMISSION_GRANTED;
+
+            //相机权限
+            boolean cameraPermission = pkgManager.checkPermission(Manifest.permission.CAMERA,getPackageName()) == PackageManager.PERMISSION_GRANTED;
+            //sd卡读取权限
+            boolean sdCardReadPermission = pkgManager.checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,getPackageName()) == PackageManager.PERMISSION_GRANTED;
+
+            if (Build.VERSION.SDK_INT >= 23 && !sdCardWritePermission || !phoneSatePermission || !cameraPermission || !sdCardReadPermission) {
+                requestPermission();
+            }else{
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void requestPermission() {
+        try {
+            ActivityCompat.requestPermissions(this, new String[]
+                            {
+                                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                        Manifest.permission.READ_PHONE_STATE,
+                                        Manifest.permission.CAMERA,
+                                        Manifest.permission.READ_EXTERNAL_STORAGE
+                            },
+                    REQUEST_PERMISSION);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        try {
+            switch (requestCode){
+                case REQUEST_PERMISSION://SD卡访问权限
+                    if ((grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                            && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+
+                    } else {
+//                        ToastUtil.showText(context,"权限拒绝！",1);
+//                        //没有权限
+//                        new AlertDialog.Builder(activity)
+//                                .setTitle("提示")
+//                                .setMessage("应用必须打开[允许安装未知来源应用，SD卡读写，相机拍照]权限，请去设置中开启权限")
+//                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int which) {
+//                                        JumpPermissionManagement.goToSettings(activity);
+//                                        dialog.dismiss();
+//
+//                                    }
+//                                }).show();
+
+                    }
+                    break;
+            }
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //安装应用的流程
+    private void installProcess() {
+
+        boolean haveInstallPermission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O  ) {
+            //先获取是否有安装未知来源应用的权限
+            haveInstallPermission = getPackageManager().canRequestPackageInstalls();
+            if (!haveInstallPermission) {
+                //没有权限
+                new AlertDialog.Builder(activity)
+                        .setTitle("提示")
+                        .setMessage("安装应用需要打开[允许安装未知来源应用]权限，请去设置中开启权限")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    startInstallPermissionSettingActivity();
+                                }
+                                dialog.dismiss();
+
+                            }
+                        }).show();
+
+
+                return;
+            }
+        }
+        //有权限，开始安装应用程序
+        installApk();
+    }
+
+
+
+
+    private void startInstallPermissionSettingActivity() {
+        Uri packageURI = Uri.parse("package:" + getPackageName());
+        //注意这个是8.0新API
+        Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, packageURI);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+
+
+    /**
+     * 安装apk
+     */
+    void installApk() {
+
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"businfoentry.apk")),
+                "application/vnd.android.package-archive");
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+//            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory(),"businfoentry.apk")),
+//                    "application/vnd.android.package-archive");
+//        } else {
+//            //Android7.0之后获取uri要用contentProvider
+//            Uri uri = AppCommonUtils.getUriFromFile(getBaseContext(), new File(Environment.getExternalStorageDirectory(),"businfoentry.apk"));
+//            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//        }
+
+        startActivity(intent);
+        BaseApplication.getInstance().exit();
+
+
+
+    }
+
+    /**
+     * 弹出版本升级提示框
+     */
+    private void showUpdateDialog(){
+        View view = LayoutInflater.from(this).inflate(R.layout.update_hint_dialog, null);
+        //版本号：
+        TextView tvVersion=(TextView) view.findViewById(R.id.update_hint_tvVersion);
+        tvVersion.setText("v"+info.getVersion());
+        //描述信息
+
+        //进度条
+        final ProgressBar mProgressBar = view.findViewById(R.id.update_hint_progressBar);
+        RelativeLayout layoutMsg = view.findViewById(R.id.update_hint_layoutMsg);
+        mProgressBar.setVisibility(View.INVISIBLE);
+        layoutMsg.setVisibility(View.INVISIBLE);
+        //操作按钮
+        final Button btUpdate = (Button) view.findViewById(R.id.update_hint_btUpdate);
+        mDialog = new Dialog(this,R.style.dialog);
+        Window dialogWindow = mDialog.getWindow();
+        WindowManager.LayoutParams params = mDialog.getWindow().getAttributes(); // 获取对话框当前的参数值
+        dialogWindow.setAttributes(params);
+        mDialog.setContentView(view);
+        btUpdate.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                btUpdate.setText("正在下载");
+                downFile();
+                mDialog.dismiss();
+
+            }
+        });
+        //点击屏幕和物理返回键dialog不消失
+        mDialog.setCancelable(false);
+        mDialog.show();
+    }
+
+    /**
+     * 开始下载
+     */
+    private void downFile(){
+        //开始下载
+        DownLoadAsyncTask downLoad=new DownLoadAsyncTask(context, handler,info);
+        downLoad.execute(info.getUrl());
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_CODE){
+            if(resultCode == RESULT_OK){
+                //再次执行安装流程，包含权限判等
+                installProcess();
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private long mBackTime = -1;
+
+    @Override
+    public void onBackPressed() {
+        long nowTime = System.currentTimeMillis();
+        long diff = nowTime - mBackTime;
+        if (diff >= 2000) {
+            mBackTime = nowTime;
+            ToastUtil.showText(this,"再按一次退出",1);
+        } else {
+            myApp.exit();
+        }
+    }
+}

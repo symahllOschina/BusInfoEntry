@@ -1,0 +1,901 @@
+package com.wdkj.dkhdl.bean;
+
+import java.io.Serializable;
+
+/**
+ * 商户信息
+ */
+public class BusDetailData implements Serializable{
+
+
+    private Integer id;//商户资料表id :318,
+    private Integer agent_id;//代理id :11,
+    private Long gmt_create;//商户资料提交时间
+    private String merchant_status;//商户提交状态0  未提交  1 审核中 2 审核驳回 3 审核通过
+    private String timely_sign;//"0" 没审核过时为0，审核过并审核通过时为1，其中二次修改时值不会根据提交状态而改变
+    private String error_msg;//merchant_status状态为2即审核驳回时返回驳回原因
+
+    /** 第一页信息 */
+    private String merchant_name;//商户名称（唯一不能修改）
+    private String merchant_alias;//商户简称 "136",
+    private String merchant_company;//注册名称  1364",
+    private String merchant_province_code;//商户所在省 "120000",
+    private String merchant_city_code;//商户所在市 "40002",
+    private String merchant_county_code;//商户所在区县
+    private String merchant_address;//商户详细地址  "1部",
+    private String merchant_person;//商户联系人  "1255",
+    private String merchant_phone;//联系人电话"15253625362",
+    private String merchant_email;//联系人邮箱 "yggv@qq.co"
+    private String business_type1_code;//": "1",//行业类目一级
+    private String business_type2_code;//": "8"//行业类目二级
+    private String business_type3_code;//": "10",//行业类目三级
+
+    /** 第一页信息回显特别字段 */
+    private String business_type1_name;//": "企业",
+    private String business_type2_name;//": "线下零售",
+    private String business_type3_name;//": "便利店",
+    private String merchant_province_name;//": "北京市",
+    private String merchant_city_name;//": "北京市",
+    private String merchant_county_name;//": "东城区",
+
+
+    private String merchant_service_phone;//客服电话"15325325356",
+    /** 第二页信息 */
+    private String settlement_mer_type;//入网类型"QY",
+    private String licenseno;//执照证件号码 "952358769822536587",
+    private String licensen_expire;//证件到期日期  "1548172800000",
+    private String licensen_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
+    private String account_type;//结算账户类型：对公 = 1，对私 = 2； "1",
+    private String document_type;//入网证件类型,默认为三证合一：SZHY,营业执照：YYZZ
+    private String is_liable_account;//是否法人入账，法人入账 = 1，非法人入账 = 2；
+    private String legal_name;//法人姓名
+    private String merchant_id_no;//法人身份证号 "61012519910426624X",
+    private String merchant_id_expire;//法人身份证号有效期 "1548172800000",
+    private String merchant_id_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
+    private String settle_id_no;//结算人身份证号
+    private String settle_id_expire;//结算人身份证号有效期
+    private String settle_id_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
+    private String account_name;//结算人账户开户名  "1",
+    private String account_no;//结算人账户开户号 "1",
+    private String account_phone;//银行预留手机号  "13253658958",
+    private String bank_zname_no;//结算账户开户总行id
+    private String bank_addres_pro_no;//结算账户开户省sid
+    private String bank_addres_city_no;//结算账户开户城市sid
+    private String bank_no;// 开户支行bank_no  "103139487204",
+
+    /** 第二页信息回显字段 */
+    private String bank_zname;//"中国建设银行",
+    private String bank_addres_pro_name;// "天津市              ",
+    private String bank_addres_city_name;// "天津市",
+    private String bank_name;// "中国建设银行股份有限公司天津西青开发区支行",
+
+
+
+    /** 第三页资质费率信息 */
+    private String wx_rate;//微信费率
+    private String ali_rate;//支付宝费率
+    private String best_rate;//翼支付费率
+    private String crebit_rate;//贷记卡费率
+    private String debit_rate;//借记卡费率
+    private String unionpay_rate;//银联费率
+
+
+    //原图片
+    private String img_business_license;//营业执照
+    private String img_idcard_a;//法人正面"https://dev.weupay.com/image/agent/11/318/thum_201810237p5n3gsb21.jpg@null",
+    private String img_idcard_b;//法人反面"https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null"
+    private String img_bankcard_a;//银行卡正面"https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null"
+    private String img_bankcard_b;//银行卡反面 "https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null",
+    private String img_logo;//商户门头照"https://dev.weupay.com/image/agent/11/318/thum_2018102320infyp42l.jpg@null",
+    private String img_indoor;//内部前台照 "https://dev.weupay.com/image/agent/11/318/thum_20181023qeic25ljee.jpg@null",
+    private String img_open_permits;//开户许可证  "https://dev.weupay.com/image/agent/11/318/thum_201810230h0tvs8vt1.jpg@null",
+    private String img_private_idcard_a;//结算人正面
+    private String img_private_idcard_b;//结算人反面
+    private String img_relation;//商户关系证明
+    private String img_mer_relation;//商户总分店关系证明
+    private String img_mer_increment;//商户增值协议证明
+    private String img_tax_reg;//税务登记证
+    private String img_org_code;//机构代码证"https://dev.weupay.com/image/agent/11/350/201810250unqh8i71v.jpg",
+    //缩略图
+    private String thum_img_business_license;//营业执照
+    private String thum_img_idcard_a;//法人正面"https://dev.weupay.com/image/agent/11/318/thum_201810237p5n3gsb21.jpg@null",
+    private String thum_img_idcard_b;//法人反面"https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null"
+    private String thum_img_bankcard_a;//银行卡正面"https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null"
+    private String thum_img_bankcard_b;//银行卡反面 "https://dev.weupay.com/image/agent/11/318/thum_20181023ni9q5i7i5t.jpg@null",
+    private String thum_img_logo;//商户门头照"https://dev.weupay.com/image/agent/11/318/thum_2018102320infyp42l.jpg@null",
+    private String thum_img_indoor;//内部前台照 "https://dev.weupay.com/image/agent/11/318/thum_20181023qeic25ljee.jpg@null",
+    private String thum_img_open_permits;//开户许可证  "https://dev.weupay.com/image/agent/11/318/thum_201810230h0tvs8vt1.jpg@null",
+    private String thum_img_private_idcard_a;//结算人正面
+    private String thum_img_private_idcard_b;//结算人反面
+    private String thum_img_relation;//商户关系证明
+    private String thum_img_mer_relation;//商户总分店关系证明
+    private String thum_img_mer_increment;//商户增值协议证明
+    private String thum_img_tax_reg;//税务登记证
+    private String thum_img_org_code;//机构代码证"https://dev.weupay.com/image/agent/11/350/201810250unqh8i71v.jpg",
+
+    private String reserve1;//借记卡封底值 "23",
+
+
+
+
+
+
+
+    private String merchant_city;//"天津市",
+    private String business_code;//"108",
+    private Integer salesman_id;// 11,
+    private String business_name;//"母婴用品/儿童玩具",
+    private String userName;//"大客户代理",
+    private String merchant_province;//"天津市",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public BusDetailData() {
+
+    }
+
+    public String getMerchant_name() {
+        return merchant_name;
+    }
+
+    public void setMerchant_name(String merchant_name) {
+        this.merchant_name = merchant_name;
+    }
+
+    public String getMerchant_alias() {
+        return merchant_alias;
+    }
+
+    public void setMerchant_alias(String merchant_alias) {
+        this.merchant_alias = merchant_alias;
+    }
+
+    public String getMerchant_company() {
+        return merchant_company;
+    }
+
+    public void setMerchant_company(String merchant_company) {
+        this.merchant_company = merchant_company;
+    }
+
+    public String getMerchant_province_code() {
+        return merchant_province_code;
+    }
+
+    public void setMerchant_province_code(String merchant_province_code) {
+        this.merchant_province_code = merchant_province_code;
+    }
+
+    public String getMerchant_city_code() {
+        return merchant_city_code;
+    }
+
+    public void setMerchant_city_code(String merchant_city_code) {
+        this.merchant_city_code = merchant_city_code;
+    }
+
+    public String getMerchant_county_code() {
+        return merchant_county_code;
+    }
+
+    public void setMerchant_county_code(String merchant_county_code) {
+        this.merchant_county_code = merchant_county_code;
+    }
+
+    public String getMerchant_address() {
+        return merchant_address;
+    }
+
+    public void setMerchant_address(String merchant_address) {
+        this.merchant_address = merchant_address;
+    }
+
+    public String getMerchant_person() {
+        return merchant_person;
+    }
+
+    public void setMerchant_person(String merchant_person) {
+        this.merchant_person = merchant_person;
+    }
+
+    public String getMerchant_phone() {
+        return merchant_phone;
+    }
+
+    public void setMerchant_phone(String merchant_phone) {
+        this.merchant_phone = merchant_phone;
+    }
+
+    public String getMerchant_email() {
+        return merchant_email;
+    }
+
+    public void setMerchant_email(String merchant_email) {
+        this.merchant_email = merchant_email;
+    }
+
+
+    public String getBusiness_type1_code() {
+        return business_type1_code;
+    }
+
+    public void setBusiness_type1_code(String business_type1_code) {
+        this.business_type1_code = business_type1_code;
+    }
+
+    public String getBusiness_type2_code() {
+        return business_type2_code;
+    }
+
+    public void setBusiness_type2_code(String business_type2_code) {
+        this.business_type2_code = business_type2_code;
+    }
+
+    public String getBusiness_type3_code() {
+        return business_type3_code;
+    }
+
+    public void setBusiness_type3_code(String business_type3_code) {
+        this.business_type3_code = business_type3_code;
+    }
+
+    public String getBusiness_type1_name() {
+        return business_type1_name;
+    }
+
+    public void setBusiness_type1_name(String business_type1_name) {
+        this.business_type1_name = business_type1_name;
+    }
+
+    public String getBusiness_type2_name() {
+        return business_type2_name;
+    }
+
+    public void setBusiness_type2_name(String business_type2_name) {
+        this.business_type2_name = business_type2_name;
+    }
+
+    public String getBusiness_type3_name() {
+        return business_type3_name;
+    }
+
+    public void setBusiness_type3_name(String business_type3_name) {
+        this.business_type3_name = business_type3_name;
+    }
+
+    public String getMerchant_province_name() {
+        return merchant_province_name;
+    }
+
+    public void setMerchant_province_name(String merchant_province_name) {
+        this.merchant_province_name = merchant_province_name;
+    }
+
+    public String getMerchant_city_name() {
+        return merchant_city_name;
+    }
+
+    public void setMerchant_city_name(String merchant_city_name) {
+        this.merchant_city_name = merchant_city_name;
+    }
+
+    public String getMerchant_county_name() {
+        return merchant_county_name;
+    }
+
+    public void setMerchant_county_name(String merchant_county_name) {
+        this.merchant_county_name = merchant_county_name;
+    }
+
+    public String getMerchant_service_phone() {
+        return merchant_service_phone;
+    }
+
+    public void setMerchant_service_phone(String merchant_service_phone) {
+        this.merchant_service_phone = merchant_service_phone;
+    }
+
+    public String getSettlement_mer_type() {
+        return settlement_mer_type;
+    }
+
+    public void setSettlement_mer_type(String settlement_mer_type) {
+        this.settlement_mer_type = settlement_mer_type;
+    }
+
+    public String getLicenseno() {
+        return licenseno;
+    }
+
+    public void setLicenseno(String licenseno) {
+        this.licenseno = licenseno;
+    }
+
+    public String getLicensen_expire() {
+        return licensen_expire;
+    }
+
+    public void setLicensen_expire(String licensen_expire) {
+        this.licensen_expire = licensen_expire;
+    }
+
+    public String getLicensen_expire_long() {
+        return licensen_expire_long;
+    }
+
+    public void setLicensen_expire_long(String licensen_expire_long) {
+        this.licensen_expire_long = licensen_expire_long;
+    }
+
+    public String getAccount_type() {
+        return account_type;
+    }
+
+    public void setAccount_type(String account_type) {
+        this.account_type = account_type;
+    }
+
+    public String getDocument_type() {
+        return document_type;
+    }
+
+    public void setDocument_type(String document_type) {
+        this.document_type = document_type;
+    }
+
+    public String getIs_liable_account() {
+        return is_liable_account;
+    }
+
+    public void setIs_liable_account(String is_liable_account) {
+        this.is_liable_account = is_liable_account;
+    }
+
+    public String getLegal_name() {
+        return legal_name;
+    }
+
+    public void setLegal_name(String legal_name) {
+        this.legal_name = legal_name;
+    }
+
+    public String getMerchant_id_no() {
+        return merchant_id_no;
+    }
+
+    public void setMerchant_id_no(String merchant_id_no) {
+        this.merchant_id_no = merchant_id_no;
+    }
+
+    public String getMerchant_id_expire() {
+        return merchant_id_expire;
+    }
+
+    public void setMerchant_id_expire(String merchant_id_expire) {
+        this.merchant_id_expire = merchant_id_expire;
+    }
+
+    public String getMerchant_id_expire_long() {
+        return merchant_id_expire_long;
+    }
+
+    public void setMerchant_id_expire_long(String merchant_id_expire_long) {
+        this.merchant_id_expire_long = merchant_id_expire_long;
+    }
+
+    public String getSettle_id_no() {
+        return settle_id_no;
+    }
+
+    public void setSettle_id_no(String settle_id_no) {
+        this.settle_id_no = settle_id_no;
+    }
+
+    public String getSettle_id_expire() {
+        return settle_id_expire;
+    }
+
+    public void setSettle_id_expire(String settle_id_expire) {
+        this.settle_id_expire = settle_id_expire;
+    }
+
+    public String getSettle_id_expire_long() {
+        return settle_id_expire_long;
+    }
+
+    public void setSettle_id_expire_long(String settle_id_expire_long) {
+        this.settle_id_expire_long = settle_id_expire_long;
+    }
+
+    public String getAccount_name() {
+        return account_name;
+    }
+
+    public void setAccount_name(String account_name) {
+        this.account_name = account_name;
+    }
+
+    public String getAccount_no() {
+        return account_no;
+    }
+
+    public void setAccount_no(String account_no) {
+        this.account_no = account_no;
+    }
+
+    public String getAccount_phone() {
+        return account_phone;
+    }
+
+    public void setAccount_phone(String account_phone) {
+        this.account_phone = account_phone;
+    }
+
+    public String getBank_zname_no() {
+        return bank_zname_no;
+    }
+
+    public void setBank_zname_no(String bank_zname_no) {
+        this.bank_zname_no = bank_zname_no;
+    }
+
+    public String getBank_addres_pro_no() {
+        return bank_addres_pro_no;
+    }
+
+    public void setBank_addres_pro_no(String bank_addres_pro_no) {
+        this.bank_addres_pro_no = bank_addres_pro_no;
+    }
+
+    public String getBank_addres_city_no() {
+        return bank_addres_city_no;
+    }
+
+    public void setBank_addres_city_no(String bank_addres_city_no) {
+        this.bank_addres_city_no = bank_addres_city_no;
+    }
+
+    public String getBank_no() {
+        return bank_no;
+    }
+
+    public void setBank_no(String bank_no) {
+        this.bank_no = bank_no;
+    }
+
+    public String getWx_rate() {
+        return wx_rate;
+    }
+
+    public void setWx_rate(String wx_rate) {
+        this.wx_rate = wx_rate;
+    }
+
+    public String getAli_rate() {
+        return ali_rate;
+    }
+
+    public void setAli_rate(String ali_rate) {
+        this.ali_rate = ali_rate;
+    }
+
+    public String getBest_rate() {
+        return best_rate;
+    }
+
+    public void setBest_rate(String best_rate) {
+        this.best_rate = best_rate;
+    }
+
+    public String getCrebit_rate() {
+        return crebit_rate;
+    }
+
+    public void setCrebit_rate(String crebit_rate) {
+        this.crebit_rate = crebit_rate;
+    }
+
+    public String getDebit_rate() {
+        return debit_rate;
+    }
+
+    public void setDebit_rate(String debit_rate) {
+        this.debit_rate = debit_rate;
+    }
+
+    public String getUnionpay_rate() {
+        return unionpay_rate;
+    }
+
+    public void setUnionpay_rate(String unionpay_rate) {
+        this.unionpay_rate = unionpay_rate;
+    }
+
+    public String getImg_business_license() {
+        return img_business_license;
+    }
+
+    public void setImg_business_license(String img_business_license) {
+        this.img_business_license = img_business_license;
+    }
+
+    public String getImg_idcard_a() {
+        return img_idcard_a;
+    }
+
+    public void setImg_idcard_a(String img_idcard_a) {
+        this.img_idcard_a = img_idcard_a;
+    }
+
+    public String getImg_idcard_b() {
+        return img_idcard_b;
+    }
+
+    public void setImg_idcard_b(String img_idcard_b) {
+        this.img_idcard_b = img_idcard_b;
+    }
+
+    public String getImg_bankcard_a() {
+        return img_bankcard_a;
+    }
+
+    public void setImg_bankcard_a(String img_bankcard_a) {
+        this.img_bankcard_a = img_bankcard_a;
+    }
+
+    public String getImg_bankcard_b() {
+        return img_bankcard_b;
+    }
+
+    public void setImg_bankcard_b(String img_bankcard_b) {
+        this.img_bankcard_b = img_bankcard_b;
+    }
+
+    public String getImg_logo() {
+        return img_logo;
+    }
+
+    public void setImg_logo(String img_logo) {
+        this.img_logo = img_logo;
+    }
+
+    public String getImg_indoor() {
+        return img_indoor;
+    }
+
+    public void setImg_indoor(String img_indoor) {
+        this.img_indoor = img_indoor;
+    }
+
+    public String getImg_open_permits() {
+        return img_open_permits;
+    }
+
+    public void setImg_open_permits(String img_open_permits) {
+        this.img_open_permits = img_open_permits;
+    }
+
+    public String getImg_private_idcard_a() {
+        return img_private_idcard_a;
+    }
+
+    public void setImg_private_idcard_a(String img_private_idcard_a) {
+        this.img_private_idcard_a = img_private_idcard_a;
+    }
+
+    public String getImg_private_idcard_b() {
+        return img_private_idcard_b;
+    }
+
+    public void setImg_private_idcard_b(String img_private_idcard_b) {
+        this.img_private_idcard_b = img_private_idcard_b;
+    }
+
+    public String getImg_relation() {
+        return img_relation;
+    }
+
+    public void setImg_relation(String img_relation) {
+        this.img_relation = img_relation;
+    }
+
+    public String getImg_mer_relation() {
+        return img_mer_relation;
+    }
+
+    public void setImg_mer_relation(String img_mer_relation) {
+        this.img_mer_relation = img_mer_relation;
+    }
+
+    public String getImg_mer_increment() {
+        return img_mer_increment;
+    }
+
+    public void setImg_mer_increment(String img_mer_increment) {
+        this.img_mer_increment = img_mer_increment;
+    }
+
+    public Long getGmt_create() {
+        return gmt_create;
+    }
+
+    public void setGmt_create(Long gmt_create) {
+        this.gmt_create = gmt_create;
+    }
+
+    public String getMerchant_status() {
+        return merchant_status;
+    }
+
+    public void setMerchant_status(String merchant_status) {
+        this.merchant_status = merchant_status;
+    }
+
+    public String getMerchant_city() {
+        return merchant_city;
+    }
+
+    public void setMerchant_city(String merchant_city) {
+        this.merchant_city = merchant_city;
+    }
+
+    public Integer getAgent_id() {
+        return agent_id;
+    }
+
+    public void setAgent_id(Integer agent_id) {
+        this.agent_id = agent_id;
+    }
+
+    public String getTimely_sign() {
+        return timely_sign;
+    }
+
+    public void setTimely_sign(String timely_sign) {
+        this.timely_sign = timely_sign;
+    }
+
+    public String getBusiness_code() {
+        return business_code;
+    }
+
+    public void setBusiness_code(String business_code) {
+        this.business_code = business_code;
+    }
+
+    public Integer getSalesman_id() {
+        return salesman_id;
+    }
+
+    public void setSalesman_id(Integer salesman_id) {
+        this.salesman_id = salesman_id;
+    }
+
+    public String getBank_name() {
+        return bank_name;
+    }
+
+    public void setBank_name(String bank_name) {
+        this.bank_name = bank_name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getBusiness_name() {
+        return business_name;
+    }
+
+    public void setBusiness_name(String business_name) {
+        this.business_name = business_name;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getMerchant_province() {
+        return merchant_province;
+    }
+
+    public void setMerchant_province(String merchant_province) {
+        this.merchant_province = merchant_province;
+    }
+
+    public String getBank_zname() {
+        return bank_zname;
+    }
+
+    public void setBank_zname(String bank_zname) {
+        this.bank_zname = bank_zname;
+    }
+
+    public String getBank_addres_pro_name() {
+        return bank_addres_pro_name;
+    }
+
+    public void setBank_addres_pro_name(String bank_addres_pro_name) {
+        this.bank_addres_pro_name = bank_addres_pro_name;
+    }
+
+    public String getBank_addres_city_name() {
+        return bank_addres_city_name;
+    }
+
+    public void setBank_addres_city_name(String bank_addres_city_name) {
+        this.bank_addres_city_name = bank_addres_city_name;
+    }
+
+    public String getImg_tax_reg() {
+        return img_tax_reg;
+    }
+
+    public void setImg_tax_reg(String img_tax_reg) {
+        this.img_tax_reg = img_tax_reg;
+    }
+
+    public String getImg_org_code() {
+        return img_org_code;
+    }
+
+    public void setImg_org_code(String img_org_code) {
+        this.img_org_code = img_org_code;
+    }
+
+    public String getThum_img_business_license() {
+        return thum_img_business_license;
+    }
+
+    public void setThum_img_business_license(String thum_img_business_license) {
+        this.thum_img_business_license = thum_img_business_license;
+    }
+
+    public String getThum_img_idcard_a() {
+        return thum_img_idcard_a;
+    }
+
+    public void setThum_img_idcard_a(String thum_img_idcard_a) {
+        this.thum_img_idcard_a = thum_img_idcard_a;
+    }
+
+    public String getThum_img_idcard_b() {
+        return thum_img_idcard_b;
+    }
+
+    public void setThum_img_idcard_b(String thum_img_idcard_b) {
+        this.thum_img_idcard_b = thum_img_idcard_b;
+    }
+
+    public String getThum_img_bankcard_a() {
+        return thum_img_bankcard_a;
+    }
+
+    public void setThum_img_bankcard_a(String thum_img_bankcard_a) {
+        this.thum_img_bankcard_a = thum_img_bankcard_a;
+    }
+
+    public String getThum_img_bankcard_b() {
+        return thum_img_bankcard_b;
+    }
+
+    public void setThum_img_bankcard_b(String thum_img_bankcard_b) {
+        this.thum_img_bankcard_b = thum_img_bankcard_b;
+    }
+
+    public String getThum_img_logo() {
+        return thum_img_logo;
+    }
+
+    public void setThum_img_logo(String thum_img_logo) {
+        this.thum_img_logo = thum_img_logo;
+    }
+
+    public String getThum_img_indoor() {
+        return thum_img_indoor;
+    }
+
+    public void setThum_img_indoor(String thum_img_indoor) {
+        this.thum_img_indoor = thum_img_indoor;
+    }
+
+    public String getThum_img_open_permits() {
+        return thum_img_open_permits;
+    }
+
+    public void setThum_img_open_permits(String thum_img_open_permits) {
+        this.thum_img_open_permits = thum_img_open_permits;
+    }
+
+    public String getThum_img_private_idcard_a() {
+        return thum_img_private_idcard_a;
+    }
+
+    public void setThum_img_private_idcard_a(String thum_img_private_idcard_a) {
+        this.thum_img_private_idcard_a = thum_img_private_idcard_a;
+    }
+
+    public String getThum_img_private_idcard_b() {
+        return thum_img_private_idcard_b;
+    }
+
+    public void setThum_img_private_idcard_b(String thum_img_private_idcard_b) {
+        this.thum_img_private_idcard_b = thum_img_private_idcard_b;
+    }
+
+    public String getThum_img_relation() {
+        return thum_img_relation;
+    }
+
+    public void setThum_img_relation(String thum_img_relation) {
+        this.thum_img_relation = thum_img_relation;
+    }
+
+    public String getThum_img_mer_relation() {
+        return thum_img_mer_relation;
+    }
+
+    public void setThum_img_mer_relation(String thum_img_mer_relation) {
+        this.thum_img_mer_relation = thum_img_mer_relation;
+    }
+
+    public String getThum_img_mer_increment() {
+        return thum_img_mer_increment;
+    }
+
+    public void setThum_img_mer_increment(String thum_img_mer_increment) {
+        this.thum_img_mer_increment = thum_img_mer_increment;
+    }
+
+    public String getThum_img_tax_reg() {
+        return thum_img_tax_reg;
+    }
+
+    public void setThum_img_tax_reg(String thum_img_tax_reg) {
+        this.thum_img_tax_reg = thum_img_tax_reg;
+    }
+
+    public String getThum_img_org_code() {
+        return thum_img_org_code;
+    }
+
+    public void setThum_img_org_code(String thum_img_org_code) {
+        this.thum_img_org_code = thum_img_org_code;
+    }
+
+    public String getReserve1() {
+        return reserve1;
+    }
+
+    public void setReserve1(String reserve1) {
+        this.reserve1 = reserve1;
+    }
+
+    public String getError_msg() {
+        return error_msg;
+    }
+
+    public void setError_msg(String error_msg) {
+        this.error_msg = error_msg;
+    }
+}

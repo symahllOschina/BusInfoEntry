@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_c2c2c2"
+    android:orientation="vertical" >
+
+    <!-- 引入标题栏 -->
+    <include layout="@layout/main_toolbar_layout" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/white_f2f2f2"
+        android:padding="15dp"
+        >
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/success_icon"
+            android:layout_gravity="center_vertical"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="15dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="商户资料提交成功，请耐心等待审核！"
+                android:textSize="@dimen/TextSize18"
+                android:textColor="@color/black_333"
+                ></TextView>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/submit_success_layoutInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white_ffffff"
+        android:orientation="vertical"
+        android:padding="15dp"
+        android:visibility="gone"
+        >
+
+        <TextView
+            android:id="@+id/submit_success_busName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/busName"
+            android:textColor="@color/black_333"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

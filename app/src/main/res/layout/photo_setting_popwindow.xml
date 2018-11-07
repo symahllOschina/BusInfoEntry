@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/gray_999"
+    >
+    <TextView
+        android:id="@+id/photo_setting_popwindow_tvGallery"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:text="相册"
+        android:textSize="@dimen/TextSize18"
+        android:gravity="center"
+        android:background="@color/white_f2f2f2"
+        />
+    <TextView
+        android:id="@+id/photo_setting_popwindow_tvCamera"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:text="拍照"
+        android:textSize="@dimen/TextSize18"
+        android:gravity="center"
+        android:layout_marginTop="2dp"
+        android:background="@color/white_f2f2f2"
+        />
+
+    <TextView
+        android:id="@+id/photo_setting_popwindow_tvCaccel"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:text="取消"
+        android:textSize="@dimen/TextSize18"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@color/white_f2f2f2"
+        />
+</LinearLayout>

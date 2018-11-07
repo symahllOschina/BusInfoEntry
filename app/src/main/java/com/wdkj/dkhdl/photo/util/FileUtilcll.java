@@ -1,0 +1,189 @@
+package com.wdkj.dkhdl.photo.util;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+/**
+ * 图文处理类（图片裁剪后的处理）
+ */
+public class FileUtilcll {
+
+
+
+    /**
+     * 将Bitmap 图片保存到本地路径，并返回路径
+     *
+     * @param fileName 文件名称
+     * @param bitmap   图片
+     * @param资源类型，参照 MultimediaContentType 枚举，根据此类型，保存时可自动归类
+     */
+    public static String saveFile(Context c, String fileName, Bitmap bitmap) {
+        return saveFile(c, "", fileName, bitmap);
+    }
+
+    public static String saveFile(Context c, String filePath, String fileName, Bitmap bitmap) {
+        byte[] bytes = bitmapToBytes(bitmap);
+        return saveFile(c, filePath, fileName, bytes);
+    }
+
+    /**
+     * Bitmap 转 字节数组
+     */
+    public static byte[] bitmapToBytes(Bitmap bm) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(); bm.compress(Bitmap.CompressFormat.JPEG,100,baos);
+        return baos.toByteArray();
+    }
+
+    public static String saveFile(Context c, String filePath, String fileName, byte[] bytes) {
+        String fileFullName = "";
+        FileOutputStream fos = null;
+        String dateFolder = new SimpleDateFormat("yyyyMMddHHmmss",Locale.CHINA).format(new Date());
+        try {
+            String suffix = "";
+            if (filePath == null || filePath.trim().length() == 0) {
+                filePath = Environment.getExternalStorageDirectory() + "/cxs/" + dateFolder + "/";
+            }
+            File file = new File(filePath);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            File fullFile = new File(filePath, fileName + suffix);
+            fileFullName = fullFile.getPath();
+            fos = new FileOutputStream(new File(filePath, fileName + suffix));
+            fos.write(bytes);
+        } catch (Exception e) {
+            fileFullName = "";
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    fileFullName = "";
+                }
+            }
+        }
+        return fileFullName;
+    }
+
+    /**
+     * 根据文件路径转换为Bitmap
+     * /storage/emulated/0/cxs/20181019093317/crop.jpg
+     */
+    public static Bitmap getBitMBitmap(String imgPath) {
+
+        Bitmap map = null;
+        try {
+            FileInputStream fis = new FileInputStream(imgPath);
+            map  = BitmapFactory.decodeStream(fis);
+            // TODO Auto-generated catch block
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+
+    /**
+     * 通过bitmap转换成指定路径的文件
+     */
+    public static File saveBitmapFile(Bitmap bitmap,String filePath) throws Exception{
+        File file = new File(filePath);
+        //将要保存图片的路径
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        bos.flush(); bos.close();
+        return file;
+
+
+    }
+
+    /**
+     * uri转bitmap
+     */
+    public static Bitmap uriTurnBitmap(Context context,Uri uri) throws Exception{
+        Bitmap bitmap = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri));
+        return bitmap;
+    }
+
+    /**
+     * uri 转 File(例如拍照返回的uri)
+     */
+    public static File uriTurnFile(Uri uri) {
+
+        return new File(uri.getPath());
+
+    }
+
+    /**
+     * File 转 Uri
+     */
+    public static Uri fileTurnUri(File file) {
+        return  Uri.fromFile(file);
+    }
+
+    /**
+     * Android部分手机拍照上传图片出现角度旋转的问题
+     * https://blog.csdn.net/gqdbk/article/details/80170324
+     * 读取图片属性：旋转的角度
+     * @param path 图片绝对路径
+     * @return degree旋转的角度
+     */
+    public static int readPictureDegree(String path) {
+        int degree = 0;
+        try {
+            ExifInterface exifInterface = new ExifInterface(path);
+            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    degree = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    degree = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    degree = 270;
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return degree;
+
+    }
+
+    /**
+     * Android部分手机拍照上传图片出现角度旋转的问题
+     * https://blog.csdn.net/gqdbk/article/details/80170324
+     * 旋转图片
+     */
+    public static Bitmap rotaingImageView(int angle , Bitmap bitmap) {
+        //旋转图片 动作
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        Log.e("旋转图片：","angle2=" + angle);
+        // 创建新的图片
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        return resizedBitmap;
+    }
+
+
+
+
+}
