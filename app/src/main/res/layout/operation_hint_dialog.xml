@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/confrim_hint_dialog_bg"
+    android:paddingTop="30dp"
+    android:paddingBottom="20dp"
+    android:gravity="center"
+    >
+    <TextView
+        android:id="@+id/operation_hint_tvMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="是否确认删除？"
+        android:textColor="@color/black_333"
+        android:textSize="@dimen/TextSize16"
+        android:gravity="center"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        >
+
+        <TextView
+            android:id="@+id/operation_hint_tvCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:background="@drawable/bt_gray_radius10"
+            android:gravity="center"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:text="取   消"
+            android:textColor="@color/white_ffffff"
+            android:textSize="@dimen/TextSize17" />
+
+        <TextView
+            android:id="@+id/operation_hint_tvOk"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginLeft="15dp"
+            android:background="@drawable/bt_blue_radius10"
+            android:gravity="center"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:text="确   定"
+            android:textColor="@color/white_ffffff"
+            android:textSize="@dimen/TextSize17" />
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,300 @@
+package com.wdkj.dkhdl.activity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.wdkj.dkhdl.BaseActivity;
+import com.wdkj.dkhdl.MainActivity;
+import com.wdkj.dkhdl.R;
+import com.wdkj.dkhdl.adapter.BusListAdapter;
+import com.wdkj.dkhdl.bean.BusListData;
+import com.wdkj.dkhdl.bean.BusDetailData;
+import com.wdkj.dkhdl.bean.UserBean;
+import com.wdkj.dkhdl.httputil.HttpURLConnectionUtil;
+import com.wdkj.dkhdl.httputil.NetworkUtils;
+import com.wdkj.dkhdl.refresh.view.XListView;
+import com.wdkj.dkhdl.utils.GsonUtils;
+import com.wdkj.dkhdl.utils.NitConfig;
+import com.wdkj.dkhdl.utils.ToastUtil;
+import com.wdkj.dkhdl.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xutils.view.annotation.ContentView;
+import org.xutils.view.annotation.ViewInject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 商户列表
+ */
+@ContentView(R.layout.activity_bus_list)
+public class BusListActivity extends BaseActivity implements XListView.IXListViewListener,AdapterView.OnItemClickListener{
+
+    private Context context;
+    @ViewInject(R.id.mXListView)
+    XListView mListView;
+
+    private UserBean userBean = MainActivity.userBean;
+
+    private int pageNum = 1;//默认加载第一页
+    private static final int pageNumCount = 20;//默认一页加载xx条数据（死值不变）
+    //总条数
+    private int orderListTotalCount = 0;
+    //每次上拉获取的条数
+    private int getMoerNum = 0;
+    private static final int REFRESH = 100;
+    private static final int LOADMORE = 200;
+    private static final int NOLOADMORE = 300;
+    private String loadMore = "0";//loadMore为1表示刷新操作  2为加载更多操作，
+
+    private List<BusDetailData> lsBus = new ArrayList<>();
+    private BusListAdapter mAdapter;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        context = BusListActivity.this;
+
+        setTitle("商户列表");
+
+        initView();
+
+        getBusList(pageNum,pageNumCount);
+    }
+
+    private void initView(){
+        mListView.setPullLoadEnable(true);//是否可以上拉加载更多,默认可以上拉
+        mListView.setPullRefreshEnable(true);//是否可以下拉刷新,默认可以下拉
+        mListView.setXListViewListener(this);//注册刷新和加载更多接口
+        mListView.setOnItemClickListener(this);
+    }
+    private void onLoad() {
+        mListView.stopRefresh();
+        mListView.stopLoadMore();
+        mListView.setRefreshTime(new Date().toLocaleString());
+    }
+
+    private void getBusList(final int pageNum,final int pageCount){
+        if(!loadMore.equals("1")){
+            showWaitDialog();
+        }
+        final String url = NitConfig.getBusList;
+        new Thread(){
+            @Override
+            public void run() {
+
+                try {
+                    // 拼装JSON数据，向服务端发起请求
+                    JSONObject userJSON = new JSONObject();
+                    userJSON.put("pageNum",pageNum+"");
+                    userJSON.put("numPerPage",pageCount+"");
+                    userJSON.put("salesman_id", String.valueOf(userBean.getSalesman_id()));
+                    userJSON.put("agent_id", String.valueOf(userBean.getAgent_id()));
+                    String content = String.valueOf(userJSON);
+                    Log.e("查询商户列表请求参数：", content);
+                    String jsonStr = HttpURLConnectionUtil.doPos(url,content);
+                    Log.e("查询商户列表返回字符串结果：", jsonStr);
+                    int msg = 1;
+                    String text = jsonStr;
+                    sendMessage(msg,text);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    sendMessage(NetworkUtils.REQUEST_JSON_CODE,NetworkUtils.REQUEST_JSON_TEXT);
+                }catch (IOException e){
+                    e.printStackTrace();
+                    sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sendMessage(NetworkUtils.REQUEST_CODE,NetworkUtils.REQUEST_TEXT);
+                }
+            }
+        }.start();
+    }
+
+    private void sendMessage(int what,String text){
+        Message msg = new Message();
+        msg.what = what;
+        msg.obj = text;
+        handler.sendMessage(msg);
+    }
+
+    private Handler handler = new android.os.Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            String errorJsonText = "";
+            switch (msg.what){
+                case REFRESH:
+                    mAdapter.notifyDataSetChanged();
+                    //更新完毕
+                    onLoad();
+                    break;
+                case LOADMORE:
+                    mListView.setPullLoadEnable(true);//是否可以上拉加载更多
+                    mAdapter.notifyDataSetChanged();
+                    // 加载更多完成
+                    onLoad();
+                    break;
+                case NOLOADMORE:
+                    mListView.setPullLoadEnable(false);//是否可以上拉加载更多
+                    // 加载更多完成-->>已没有更多
+                    onLoad();
+                    break;
+                case 1:
+                    String provinceJson = (String) msg.obj;
+                    busListJson(provinceJson);
+                    hideWaitDialog();
+                    break;
+                case 201:
+                    loadMore = "0";
+                    errorJsonText = (String) msg.obj;
+                    ToastUtil.showText(context,errorJsonText,1);
+                    hideWaitDialog();
+                    break;
+                case 202:
+                    loadMore = "0";
+                    errorJsonText = (String) msg.obj;
+                    ToastUtil.showText(context,errorJsonText,1);
+                    hideWaitDialog();
+                    break;
+                case 301:
+                    loadMore = "0";
+                    errorJsonText = (String) msg.obj;
+                    ToastUtil.showText(context,errorJsonText,1);
+                    hideWaitDialog();
+                    break;
+                case 400:
+                    loadMore = "0";
+                    errorJsonText = (String) msg.obj;
+                    ToastUtil.showText(context,errorJsonText,1);
+                    hideWaitDialog();
+                    break;
+            }
+        }
+    };
+
+    private void busListJson(String json){
+        try {
+            JSONObject job = new JSONObject(json);
+            String code = job.getString("code");
+            String msg = job.getString("msg");
+            if(code.equals("000000")){
+                String dataJson = job.getString("data");
+                Gson gjson  =  GsonUtils.getGson();
+                java.lang.reflect.Type type = new TypeToken<BusListData>() {}.getType();
+                BusListData bus = gjson.fromJson(dataJson, type);
+                //获取总条数
+                orderListTotalCount = bus.getTotalCount();
+                Log.e("总条数：", orderListTotalCount+"");
+                List<BusDetailData> list = new ArrayList<BusDetailData>();
+                //获取的list
+                list = bus.getShopList();
+                getMoerNum = list.size();
+                if(pageNum == 1){
+                    lsBus.clear();
+                }
+                lsBus.addAll(list);
+                Log.e("查询数据：", lsBus.size()+""+"条");
+                //关闭上拉或下拉View，刷新Adapter
+                if(loadMore.equals("0")){
+                    mAdapter = new BusListAdapter(context, lsBus);
+                    mListView.setAdapter(mAdapter);
+                    if(lsBus.size()<=orderListTotalCount&&getMoerNum==pageNumCount){
+                        Message msg1 = new Message();
+                        msg1.what = LOADMORE;
+                        handler.sendEmptyMessageDelayed(LOADMORE, 0);
+                    }else{
+                        Message msg1 = new Message();
+                        msg1.what = NOLOADMORE;
+                        handler.sendEmptyMessageDelayed(NOLOADMORE, 0);
+                    }
+                }else if(loadMore.equals("1")){
+                    Message msg1 = new Message();
+                    msg1.what = REFRESH;
+                    handler.sendEmptyMessageDelayed(REFRESH, 2000);
+                }else if(loadMore.equals("2")){
+                    Message msg1 = new Message();
+                    msg1.what = LOADMORE;
+                    handler.sendEmptyMessageDelayed(LOADMORE, 2000);
+                }
+
+            }else {
+                if(Utils.isNotEmpty(msg)){
+                    ToastUtil.showText(context,msg,1);
+                }else{
+                    ToastUtil.showText(context,"查询失败！",1);
+                }
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        loadMore = "0";
+    }
+
+    @Override
+    public void onRefresh() {
+        loadMore = "1";
+        pageNum = 1;
+        getBusList(pageNum,pageNumCount);
+    }
+
+    @Override
+    public void onLoadMore() {
+        loadMore = "2";
+        if(lsBus.size()<=orderListTotalCount&&getMoerNum==pageNumCount){
+            //已取出数据条数<=服务器端总条数&&上一次上拉取出的条数 == 规定的每页取出条数时代表还有数据库还有数据没取完
+            pageNum = pageNum + 1;
+            getBusList(pageNum,pageNumCount);
+        }else{
+            //没有数据执行两秒关闭view
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Message msg = new Message();
+                    msg.what = NOLOADMORE;
+                    handler.sendMessage(msg);
+                }
+            }, 1000);
+
+        }
+    }
+
+    /** Item点击事件 */
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //merchant_status;//商户提交状态0  未提交  1 审核中 2 审核驳回 3 审核通过
+        //timely_sign;//"0" 没审核过时为0，审核过并审核通过时为1，其中二次修改时值不会根据提交状态而改变
+        BusDetailData bus = lsBus.get(position-1);
+        int busId = bus.getId();
+        String merchant_status = bus.getMerchant_status();
+        String timely_sign = bus.getTimely_sign();
+        if(!merchant_status.equals("1")&&timely_sign.equals("0")){
+            Intent intent = new Intent();
+            intent.putExtra("id",busId);
+            intent.setClass(this,BasicInfoActivity.class);
+            startActivity(intent);
+        }else{
+            snackError("暂不支持修改或查看审核中和审核通过的商户信息！");
+//            ToastUtil.showText(context,"暂不支持修改和查看审核中和审核通过的商户信息！",2);
+        }
+
+
+
+    }
+}

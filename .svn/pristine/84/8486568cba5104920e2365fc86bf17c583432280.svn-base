@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">鼎力伙伴</string>
+
+    <string name="login_etuser_hint">请输入用户名</string>
+    <string name="login_etpasswd_hint">请输入密码</string>
+    <string name="login_text">登录</string>
+
+    <string name="xlistview_header_hint_normal">下拉刷新</string>
+    <string name="xlistview_header_hint_ready">松开刷新数据</string>
+    <string name="xlistview_header_hint_loading">正在加载...</string>
+    <string name="xlistview_header_last_time">最近更新：</string>
+    <string name="xlistview_footer_hint_normal">查看更多</string>
+    <string name="xlistview_footer_hint_ready">松开载入更多</string>
+    <string name="xlistview_footer_hint_nomore">没有更多</string>
+
+    <string name="busName">商户名称：%1$s</string>
+    <string name="create_time">创建时间：%1$s</string>
+    <string name="failure_hints">审核驳回原因：%1$s</string>
+</resources>
