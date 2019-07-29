@@ -57,9 +57,6 @@ public class MainHomeFragment extends BaseFragment implements View.OnClickListen
                 intent.setClass(getActivity(), BusListActivity.class);
                 startActivity(intent);
                 break;
-            default:
-
-                break;
         }
     }
 }

@@ -29,9 +29,6 @@ public class TimeSelector {
         void handle(String time);
     }
 
-    /**
-     * 时间选择控件封装类
-     */
     public enum SCROLLTYPE {
 
         HOUR(1),
@@ -45,9 +42,6 @@ public class TimeSelector {
 
     }
 
-    /**
-     * 时间选择控件封装类
-     */
     public enum MODE {
 
         YMD(1),
@@ -119,9 +113,7 @@ public class TimeSelector {
             return;
         }
 
-        if (!excuteWorkTime()) {
-            return;
-        }
+        if (!excuteWorkTime()) return;
         initParameter();
         initTimer();
         addListener();
@@ -130,9 +122,8 @@ public class TimeSelector {
 
     }
     public void dismiss() {
-        if(seletorDialog!=null) {
+        if(seletorDialog!=null)
             seletorDialog.dismiss();
-        }
 
 
     }
@@ -372,21 +363,11 @@ public class TimeSelector {
     }
 
     private void initArrayList() {
-        if (year == null) {
-            year = new ArrayList<>();
-        }
-        if (month == null) {
-            month = new ArrayList<>();
-        }
-        if (day == null) {
-            day = new ArrayList<>();
-        }
-        if (hour == null) {
-            hour = new ArrayList<>();
-        }
-        if (minute == null) {
-            minute = new ArrayList<>();
-        }
+        if (year == null) year = new ArrayList<>();
+        if (month == null) month = new ArrayList<>();
+        if (day == null) day = new ArrayList<>();
+        if (hour == null) hour = new ArrayList<>();
+        if (minute == null) minute = new ArrayList<>();
         year.clear();
         month.clear();
         day.clear();
@@ -623,9 +604,8 @@ public class TimeSelector {
     }
 
     public int disScrollUnit(SCROLLTYPE... scrolltypes) {
-        if (scrolltypes == null || scrolltypes.length == 0) {
+        if (scrolltypes == null || scrolltypes.length == 0)
             scrollUnits = SCROLLTYPE.HOUR.value + SCROLLTYPE.MINUTE.value;
-        }
         for (SCROLLTYPE scrolltype : scrolltypes) {
             scrollUnits ^= scrolltype.value;
         }
@@ -647,9 +627,6 @@ public class TimeSelector {
                 minute_pv.setVisibility(View.VISIBLE);
                 hour_text.setVisibility(View.VISIBLE);
                 minute_text.setVisibility(View.VISIBLE);
-                break;
-            default:
-
                 break;
 
         }

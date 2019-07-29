@@ -18,7 +18,6 @@ public class RegionData implements Serializable{
     private String lat;//: null,
     private String level;//: 0
 
-
     private List<RegionData> subList;//对应的下面的子菜单
 
 

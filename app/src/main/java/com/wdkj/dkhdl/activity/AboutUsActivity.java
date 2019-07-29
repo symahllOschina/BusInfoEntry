@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.wdkj.dkhdl.BaseActivity;
@@ -26,9 +25,6 @@ public class AboutUsActivity extends BaseActivity{
     private Context context;
 
 
-
-    @ViewInject(R.id.main_fragment_my_signOutLayout)
-    RelativeLayout signOutLayout;
     @ViewInject(R.id.about_us_tvVersionCode)
     TextView tvVersionCode;
 
@@ -44,13 +40,6 @@ public class AboutUsActivity extends BaseActivity{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        signOutLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
     }
 }

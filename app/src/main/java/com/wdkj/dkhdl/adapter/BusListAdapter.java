@@ -75,7 +75,7 @@ public class BusListAdapter extends BaseAdapter{
         String timely_signStr = list.get(position).getTimely_sign();
         String status = "";
         if(Utils.isNotEmpty(statusStr)){
-            if("0".equals(statusStr)){
+            if(statusStr.equals("0")){
                 status = "未提交";
             }else if(statusStr.equals("1")){
                 status = "审核中";

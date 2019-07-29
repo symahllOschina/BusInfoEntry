@@ -18,15 +18,10 @@ import com.wdkj.dkhdl.R;
 public class PhotoPopupWindow extends PopupWindow{
 
     private Context context;
-    /**
-     * 是否是上传操作，true:上传，false:撤销操作
-     */
-    private boolean isUpload;
 
-    public PhotoPopupWindow(Context context,boolean isUpload) {
+    public PhotoPopupWindow(Context context) {
         super(context);
         this.context = context;
-        this.isUpload = isUpload;
     }
 
     private OnSelectClickListener onSelectClickListener;
@@ -44,18 +39,11 @@ public class PhotoPopupWindow extends PopupWindow{
         TextView tvGallery = view.findViewById(R.id.photo_setting_popwindow_tvGallery);
         TextView tvCamera = view.findViewById(R.id.photo_setting_popwindow_tvCamera);
         TextView tvCancel = view.findViewById(R.id.photo_setting_popwindow_tvCaccel);
-        if(!isUpload){
-            tvGallery.setText("删除");
-            tvCamera.setText("查看大图");
-        }
         // 相册
         tvGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int type = 1;
-                if(!isUpload){
-                    type = 3;
-                }
                 onSelectClickListener.selectListener(type);
                 // 销毁弹出框
                 dismiss();
@@ -66,9 +54,6 @@ public class PhotoPopupWindow extends PopupWindow{
             @Override
             public void onClick(View v) {
                 int type = 2;
-                if(!isUpload){
-                    type = 4;
-                }
                 onSelectClickListener.selectListener(type);
                 // 销毁弹出框
                 dismiss();

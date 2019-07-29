@@ -33,7 +33,7 @@ public class EditTextUtils {
                         editText.setSelection(s.length());
                     }
                 }
-                if (".".equals(s.toString().trim().substring(0))) {
+                if (s.toString().trim().substring(0).equals(".")) {
                     s = "0" + s;
                     editText.setText(s);
                     editText.setSelection(2);

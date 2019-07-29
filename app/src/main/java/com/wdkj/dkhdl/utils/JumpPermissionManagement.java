@@ -244,7 +244,7 @@ public class JumpPermissionManagement {
      * 只能打开到自带安全软件
      * @param activity
      */
-    public static void A_360(Activity activity) {
+    public static void _360(Activity activity) {
         Intent intent = new Intent("android.intent.action.MAIN");
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("packageName", BuildConfig.APPLICATION_ID);

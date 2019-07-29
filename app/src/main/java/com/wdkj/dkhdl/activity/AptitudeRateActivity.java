@@ -1,7 +1,6 @@
 package com.wdkj.dkhdl.activity;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,40 +18,25 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.ScrollView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.wdkj.dkhdl.BaseActivity;
 import com.wdkj.dkhdl.BaseApplication;
-import com.wdkj.dkhdl.Constant;
-import com.wdkj.dkhdl.LoginActivity;
 import com.wdkj.dkhdl.MainActivity;
 import com.wdkj.dkhdl.R;
-import com.wdkj.dkhdl.adapter.IndustryTypeAdapter;
 import com.wdkj.dkhdl.bean.BusDetailData;
-import com.wdkj.dkhdl.bean.BusWxAndAliDetailData;
-import com.wdkj.dkhdl.bean.IndustryTypeData;
 import com.wdkj.dkhdl.bean.UserBean;
 import com.wdkj.dkhdl.httputil.HttpURLConnectionUtil;
 import com.wdkj.dkhdl.httputil.NetworkUtils;
@@ -62,7 +46,6 @@ import com.wdkj.dkhdl.utils.DecimalUtil;
 import com.wdkj.dkhdl.utils.FileUtils;
 import com.wdkj.dkhdl.utils.GsonUtils;
 import com.wdkj.dkhdl.utils.NitConfig;
-import com.wdkj.dkhdl.utils.SharedPreferencesUtil;
 import com.wdkj.dkhdl.utils.ToastUtil;
 import com.wdkj.dkhdl.utils.UploadUtil;
 import com.wdkj.dkhdl.utils.Utils;
@@ -93,27 +76,12 @@ import java.util.Map;
  * https://blog.csdn.net/guolin_blog/article/details/78357251
  */
 @ContentView(R.layout.activity_rate_info)
-public class AptitudeRateActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener,View.OnClickListener,PhotoPopupWindow.OnSelectClickListener{
+public class AptitudeRateActivity extends BaseActivity implements View.OnClickListener,PhotoPopupWindow.OnSelectClickListener{
 
     @ViewInject(R.id.info_failure_hintText)
     TextView tvErrorMsg;
     @ViewInject(R.id.parent_myLayout)
     LinearLayout myLayout;
-
-    @ViewInject(R.id.rate_info_wxSwitch)
-    Switch wxSwitch;
-    @ViewInject(R.id.rate_info_wxLayout)
-    LinearLayout wxLayout;
-    @ViewInject(R.id.rate_info_wxContidText)
-    EditText wxContidText;
-    @ViewInject(R.id.rate_info_aliSwitch)
-    Switch aliSwitch;
-    @ViewInject(R.id.rate_info_aliLayout)
-    LinearLayout aliLayout;
-    @ViewInject(R.id.rate_info_aliSourceText)
-    EditText aliSourceText;
-    @ViewInject(R.id.rate_info_aliCtgyidText)
-    TextView aliCtgyidText;
 
     @ViewInject(R.id.rate_info_wxRateReduce)
     ImageView wxRateReduce;
@@ -161,7 +129,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
     @ViewInject(R.id.rate_info_imgLegalPersonLayout)
     LinearLayout imgLegalPersonLayout;//法人身份证
-
     @ViewInject(R.id.rate_info_imgBankCardLayout)
     LinearLayout imgBankCardLayout;//银行卡正反面
     @ViewInject(R.id.rate_info_imgOpeningPermitLayout)
@@ -205,10 +172,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     ImageView imgJGDMZ;//机构代码证
     @ViewInject(R.id.rate_info_imgSWDJZ)
     ImageView imgSWDJZ;//税务登记证
-    @ViewInject(R.id.rate_info_img_person_a)
-    ImageView imgPersonA;//联系人正面
-    @ViewInject(R.id.rate_info_img_person_b)
-    ImageView imgPersonB;//联系人反面
     @ViewInject(R.id.account_rate_btSubmit)
     Button btSubmit;
 
@@ -216,33 +179,12 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     private Context context;
     private UserBean userBean = MainActivity.userBean;
     private String MerName;//商户名称
-    private int id;//商户id
-    /**
-     * 商户类型："1" 一级商户 "2" 二级商户
-     */
-    private String merchantType;
+    private int id = 350;//商户id
     private String netType = "GT";//入网类型：企业；个体，小微
     private String accountType = "2";//结算账户类型：对公 = 1，对私 = 2；
     private String licenseType = "SZHY";//入网证件类型：三证合一；营业执照
     private String isLegalPersonAccount = "1";//是否法人入账，法人入账 = 1，非法人入账 = 2；
 
-    /** 微信支付宝信息设置 */
-    private boolean wxChecked,aliChecked;
-    private List<IndustryTypeData> lsOneIndustry = new ArrayList<IndustryTypeData>();
-    private List<IndustryTypeData> lsTwoIndustry = new ArrayList<IndustryTypeData>();
-    private List<IndustryTypeData> lsThreeIndustry = new ArrayList<IndustryTypeData>();
-
-    private IndustryTypeData oneIndustryType;
-    private IndustryTypeData twoIndustryType;
-    private IndustryTypeData threeIndustryType;
-
-
-    private int oneIndustryIndex,twoIndustryIndex,threeIndustryIndex;
-    private String oneIndustryName,twoIndustryName,threeIndustryName;
-
-    private Dialog oneIndustryDialog;
-    private Dialog twoIndustryDialog;
-    private Dialog threeIndustryDialog;
     /** 费率初始默认值 */
     private double wxRate = 6.0;//最低3.0，最高50
     private double aliRate = 6.0;//最低3.0，最高50
@@ -293,8 +235,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     private String imgMerXYPath = "";
     private String imgJGDMZPath = null;
     private String imgSWDJZPath = null;
-    private String imgPersonAPath = "";
-    private String imgPersonBPath = "";
     //原图地址
     private String yt_imgLicensePath = null;
     private String yt_imgLegalPersonJustPath = null;
@@ -311,18 +251,14 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     private String yt_imgMerXYPath = "";
     private String yt_imgJGDMZPath = null;
     private String yt_imgSWDJZPath = null;
-    private String yt_imgPersonAPath = "";
-    private String yt_imgPersonBPath = "";
 
     BusDetailData bus;//商户信息对象
-    BusWxAndAliDetailData busWxAndAli;//商户信息(微信，支付宝信息)对象
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = AptitudeRateActivity.this;
         MerName = getIntent().getStringExtra("name");
-        merchantType = getIntent().getStringExtra("merchantType");
         id = getIntent().getIntExtra("id",0);
         netType = getIntent().getStringExtra("netType");
         accountType = getIntent().getStringExtra("accountType");
@@ -346,18 +282,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e(TAG,"onResume()方法执行.....");
-        wxContidText.setFocusable(true);
-        wxContidText.setFocusableInTouchMode(true);
-        wxContidText.clearFocus();//失去焦点
-        aliSourceText.setFocusable(true);
-        aliSourceText.setFocusableInTouchMode(true);
-        aliSourceText.clearFocus();//失去焦点
-//        aliSourceText.requestFocus();//获取焦点
-    }
 
     private void initView(){
 
@@ -368,9 +292,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     }
 
     private void initListener(){
-        wxSwitch.setOnCheckedChangeListener(this);
-        aliSwitch.setOnCheckedChangeListener(this);
-        aliCtgyidText.setOnClickListener(this);
         wxRateReduce.setOnClickListener(this);
         wxRateAdd.setOnClickListener(this);
         aliRateReduce.setOnClickListener(this);
@@ -403,8 +324,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         imgMerXY.setOnClickListener(this);
         imgJGDMZ.setOnClickListener(this);
         imgSWDJZ.setOnClickListener(this);
-        imgPersonA.setOnClickListener(this);
-        imgPersonB.setOnClickListener(this);
         btSubmit.setOnClickListener(this);
     }
 
@@ -434,20 +353,13 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
         //merchant_status状态为2即审核驳回时返回驳回原因
         if(bus!=null){
-            if("2".equals(bus.getMerchant_status())){
+            if(bus.getMerchant_status().equals("2")){
                 if(Utils.isNotEmpty(bus.getError_msg())){
                     tvErrorMsg.setVisibility(View.VISIBLE);
                     tvErrorMsg.setText(String.format(getResources().getString(R.string.failure_hints),bus.getError_msg()));
                 }
             }
         }
-        //微信，支付宝信息设置
-        wxChecked = true;
-        wxSwitch.setChecked(true);
-        wxLayout.setVisibility(View.VISIBLE);
-        aliChecked = true;
-        aliSwitch.setChecked(true);
-        aliLayout.setVisibility(View.VISIBLE);
         etWxRate.setText(DecimalUtil.doubletoString(wxRate,1));
         etAliRate.setText(DecimalUtil.doubletoString(aliRate,1));
         etYzfRate.setText(DecimalUtil.doubletoString(yzfRate,1));
@@ -455,88 +367,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         etDjkRate.setText(DecimalUtil.doubletoString(djkRate,1));
         etYlRate.setText(DecimalUtil.doubletoString(ylRate,1));
         etBankReserve.setText(String.valueOf(bankReserve));
-        if(bus != null){
-            //微信支付宝开关
-            String wx_openStr = bus.getWx_open();
-            String ali_openStr = bus.getAli_open();
-            if(Utils.isNotEmpty(wx_openStr)){
-                if("Y".equals(wx_openStr)){
-                    wxChecked = true;
-                    wxSwitch.setChecked(true);
-                    wxLayout.setVisibility(View.VISIBLE);
-
-                    if(busWxAndAli != null){
-                        //联系人微信账号
-                        String wx_contidStr = busWxAndAli.getWx_contid();
-                        if(Utils.isNotEmpty(wx_contidStr)){
-                            wxContidText.setText(wx_contidStr);
-                        }
-                    }else{
-                        wxContidText.setText("");
-                    }
-                }else{
-                    wxChecked = false;
-                    wxSwitch.setChecked(false);
-                    wxLayout.setVisibility(View.GONE);
-                }
-            }
-            if(Utils.isNotEmpty(ali_openStr)){
-                if("Y".equals(ali_openStr)){
-                    aliChecked = true;
-                    aliSwitch.setChecked(true);
-                    aliLayout.setVisibility(View.VISIBLE);
-                    if(busWxAndAli != null){
-
-                        //支付宝PID
-                        String ali_sourceStr = busWxAndAli.getAli_source();
-                        if(Utils.isNotEmpty(ali_sourceStr)){
-                            aliSourceText.setText(ali_sourceStr);
-                        }else{
-                            aliSourceText.setText("");
-                        }
-                        //经营类目  "ali_ctgyid": "[1669,1686,1689]",
-                        String ali_ctgyidStr = busWxAndAli.getAli_ctgyid();
-                        Log.e(TAG,ali_ctgyidStr);
-                        String reserve1Str = busWxAndAli.getReserve1();
-                        //去掉"[ ]"字符
-                        if(Utils.isNotEmpty(ali_ctgyidStr)){
-                            if(ali_ctgyidStr.contains("[")&&ali_ctgyidStr.contains("]")){
-                                String ali_ctgyidStrOne = ali_ctgyidStr.substring(ali_ctgyidStr.indexOf("[")+1,ali_ctgyidStr.length());
-                                Log.e(TAG,ali_ctgyidStrOne);
-                                String ali_ctgyidStrTwo = ali_ctgyidStrOne.substring(0,ali_ctgyidStrOne.indexOf("]"));
-                                Log.e(TAG,ali_ctgyidStrTwo);
-                                String ali_ctgyid[] = ali_ctgyidStrTwo.split(",");
-                                String ali_ctgyName[] = reserve1Str.split(",");
-                                oneIndustryType = new IndustryTypeData();
-                                oneIndustryType.setId(Integer.parseInt(ali_ctgyid[0]));
-                                oneIndustryType.setName(ali_ctgyName[0]);
-                                twoIndustryType = new IndustryTypeData();
-                                twoIndustryType.setId(Integer.parseInt(ali_ctgyid[1]));
-                                twoIndustryType.setName(ali_ctgyName[1]);
-                                threeIndustryType = new IndustryTypeData();
-                                threeIndustryType.setId(Integer.parseInt(ali_ctgyid[2]));
-                                threeIndustryType.setName(ali_ctgyName[2]);
-                                aliCtgyidText.setText(oneIndustryType.getName()+"/"+twoIndustryType.getName()+"/"+threeIndustryType.getName());
-
-                            }else{
-                                aliCtgyidText.setText("");
-//                                showErrorHintDialog("数据异常");
-                            }
-                        }else{
-                            aliCtgyidText.setText("");
-//                            showErrorHintDialog("数据异常");
-                        }
-
-
-                    }
-                }else{
-                    aliChecked = false;
-                    aliSwitch.setChecked(false);
-                    aliLayout.setVisibility(View.GONE);
-                }
-            }
-
-
+        if(bus!=null){
             //微信费率
             String wxRateStr = bus.getWx_rate();
             if(Utils.isNotEmpty(wxRateStr)){
@@ -744,38 +575,16 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                         .apply(options)
                         .into(imgJGDMZ);
             }
-            //联系人正面照
-            String thum_img_person_a = bus.getThum_img_person_a();
-            String img_person_a = bus.getImg_person_a();
-            if(Utils.isNotEmpty(thum_img_person_a)){
-                imgSWDJZPath = thum_img_person_a;
-                yt_imgSWDJZPath = img_person_a;
-                Glide.with(this)
-                        .load(thum_img_person_a)
-                        .apply(options)
-                        .into(imgPersonA);
-            }
-            //联系人反面
-            String thum_img_person_b = bus.getThum_img_person_b();
-            String img_person_b = bus.getImg_person_b();
-            if(Utils.isNotEmpty(thum_img_person_b)){
-                imgJGDMZPath = thum_img_person_b;
-                yt_imgJGDMZPath = img_person_b;
-                Glide.with(this)
-                        .load(thum_img_person_b)
-                        .apply(options)
-                        .into(imgJGDMZ);
-            }
         }
 
 
 
         //入网类型：企业；个体，小微
-        if("QY".equals(netType)){
+        if(netType.equals("QY")){
             //结算账户类型：对公 = 1，对私 = 2；
-            if("1".equals(accountType)){
+            if(accountType.equals("1")){
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     imgBankCardLayout.setVisibility(View.GONE);
                     imgMerRelationLayout.setVisibility(View.GONE);
                     imgSettPersonLayout.setVisibility(View.GONE);
@@ -788,9 +597,9 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }else{
                 //对私
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         imgLegalPersonLayout.setVisibility(View.GONE);
                         imgMerRelationLayout.setVisibility(View.GONE);
                         imgJGDMZandSWDJZLayout.setVisibility(View.GONE);
@@ -801,7 +610,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
                 }else{
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         imgLegalPersonLayout.setVisibility(View.GONE);
                         imgMerRelationLayout.setVisibility(View.GONE);
                     }
@@ -809,11 +618,11 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }
         }
         //个体
-        else if("GT".equals(netType)){
+        else if(netType.equals("GT")){
             //结算账户类型：对公 = 1，对私 = 2；
-            if("1".equals(accountType)){
+            if(accountType.equals("1")){
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     imgBankCardLayout.setVisibility(View.GONE);
                     imgMerRelationLayout.setVisibility(View.GONE);
                     imgSettPersonLayout.setVisibility(View.GONE);
@@ -827,9 +636,9 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }else{
                 //对私
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         imgLegalPersonLayout.setVisibility(View.GONE);
                         imgOpeningPermitLayout.setVisibility(View.GONE);
                         imgMerRelationLayout.setVisibility(View.GONE);
@@ -841,7 +650,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     }
                 }else{
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         imgLegalPersonLayout.setVisibility(View.GONE);
                         imgOpeningPermitLayout.setVisibility(View.GONE);
                         imgMerRelationLayout.setVisibility(View.GONE);
@@ -860,46 +669,16 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
      * 提交本地验证
      */
     private void subTextVerification(){
-        String wxContidStr = "",aliSourceStr = "",aliCtgyidStr = "";
-    /*
-        //微信，支付宝信息设置
-        if(wxChecked){
-            wxContidStr = wxContidText.getText().toString().trim();
-            if(Utils.isEmpty(wxContidStr)){
-                ToastUtil.showText(context,"请填写联系人微信账号!",1);
-                return;
-            }
-        }
-        if(aliChecked){
-            aliSourceStr = aliSourceText.getText().toString().trim();
-            if(Utils.isEmpty(aliSourceStr)){
-                ToastUtil.showText(context,"请填写合作伙伴在支付宝的PID!",1);
-                return;
-            }
-
-            if(oneIndustryType == null || twoIndustryType == null || threeIndustryType ==null){
-                ToastUtil.showText(context,"请选择经营类目!",1);
-                return;
-            }else{
-                aliCtgyidStr = "["+String.valueOf(oneIndustryType.getId())
-                        +","
-                        + String.valueOf(twoIndustryType.getId())
-                        +","
-                        + String.valueOf(threeIndustryType.getId())+"]";
-            }
-        }
-*/
-
         if(Utils.isEmpty(imgLicensePath)){
             ToastUtil.showText(context,"请上传营业执照照片!",1);
             return;
         }
         //入网类型：企业；个体，小微
-        if("QY".equals(netType)){
+        if(netType.equals("QY")){
             //结算账户类型：对公 = 1，对私 = 2；
-            if("1".equals(accountType)){
+            if(accountType.equals("1")){
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     if(Utils.isEmpty(imgLegalPersonJustPath)){
                         ToastUtil.showText(context,"请上传法人身份证正面照片!",1);
                         return;
@@ -953,9 +732,9 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }else{
                 //对私
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         if(Utils.isEmpty(imgBankCardJustPath)){
                             ToastUtil.showText(context,"请上传银行卡正面照!",1);
                             return;
@@ -1029,7 +808,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
                 }else{
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         if(Utils.isEmpty(imgBankCardJustPath)){
                             ToastUtil.showText(context,"请上传银行卡正面照!",1);
                             return;
@@ -1122,11 +901,11 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }
         }
         //个体
-        else if("GT".equals(netType)){
+        else if(netType.equals("GT")){
             //结算账户类型：对公 = 1，对私 = 2；
-            if("1".equals(accountType)){
+            if(accountType.equals("1")){
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     if(Utils.isEmpty(imgLegalPersonJustPath)){
                         ToastUtil.showText(context,"请上传法人身份证正面照片!",1);
                         return;
@@ -1182,9 +961,9 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }else{
                 //对私
                 //入网证件类型：三证合一；营业执照
-                if("SZHY".equals(licenseType)){
+                if(licenseType.equals("SZHY")){
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         if(Utils.isEmpty(imgBankCardJustPath)){
                             ToastUtil.showText(context,"请上传银行卡正面照!",1);
                             return;
@@ -1254,7 +1033,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     }
                 }else{
                     //是否法人入账，法人入账 = 1，非法人入账 = 2；
-                    if("1".equals(isLegalPersonAccount)){
+                    if(isLegalPersonAccount.equals("1")){
                         if(Utils.isEmpty(imgBankCardJustPath)){
                             ToastUtil.showText(context,"请上传银行卡正面照!",1);
                             return;
@@ -1322,7 +1101,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                 }
             }
         }
-        subRateInfo(wxContidStr,aliSourceStr,aliCtgyidStr);
+        subRateInfo();
     }
 
     /**
@@ -1372,7 +1151,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         map.put("id", String.valueOf(id));
         map.put("agent_id", userBean.getAgent_id());
         new Thread(){
-            @Override
             public void run() {
                 Log.e(TAG,"文件路径"+file.getPath());
                 String jsonStr=UploadUtil.uploadFile(map,file, url);
@@ -1387,7 +1165,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
     }
 
-    private void subRateInfo(final String wxContidStr, final String aliSourceStr,final String aliCtgyidStr){
+    private void subRateInfo(){
         showWaitDialog();
         final String url = NitConfig.subRateInfo;
         new Thread(){
@@ -1399,23 +1177,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     userJSON.put("salesman_id", userBean.getSalesman_id());
                     userJSON.put("agent_id", userBean.getAgent_id());
                     userJSON.put("id", String.valueOf(id));
-                    userJSON.put("merchant_type", merchantType);
-                    if(wxChecked){
-                        userJSON.put("wx_open", "Y");
-                        userJSON.put("wx_contid", wxContidStr);
-                    }else{
-                        userJSON.put("wx_open", "N");
-                        userJSON.put("wx_contid", "");//""
-                    }
-                    if(aliChecked){
-                        userJSON.put("ali_open", "Y");
-                        userJSON.put("ali_source", aliSourceStr);
-                        userJSON.put("ali_ctgyid", aliCtgyidStr);
-                    }else{
-                        userJSON.put("ali_open", "N");
-                        userJSON.put("ali_source", "");
-                        userJSON.put("ali_ctgyid", "");
-                    }
                     userJSON.put("wx_rate", String.valueOf(wxRate));
                     userJSON.put("ali_rate", String.valueOf(aliRate));
                     userJSON.put("best_rate", String.valueOf(yzfRate));
@@ -1446,8 +1207,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     userJSON.put("img_mer_increment", yt_imgMerXYPath);//商户增值协议
                     userJSON.put("img_org_code", yt_imgJGDMZPath);//机构代码证
                     userJSON.put("img_tax_reg", yt_imgSWDJZPath);//税务登记证
-                    userJSON.put("img_person_a", yt_imgPersonAPath);//联系人正面
-                    userJSON.put("img_person_a", yt_imgPersonBPath);//联系人反面
 
 
                     userJSON.put("thum_img_business_license", imgLicensePath);
@@ -1467,8 +1226,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     userJSON.put("thum_img_mer_increment", imgMerXYPath);//商户增值协议
                     userJSON.put("thum_img_org_code", imgJGDMZPath);//机构代码证
                     userJSON.put("thum_img_tax_reg", imgSWDJZPath);//税务登记证
-                    userJSON.put("thum_img_person_a", imgPersonAPath);//联系人正面
-                    userJSON.put("thum_img_person_a", imgPersonBPath);//联系人反面
                     String content = String.valueOf(userJSON);
                     Log.e("提交第三页请求参数：", content);
                     String jsonStr = HttpURLConnectionUtil.doPos(url,content);
@@ -1490,114 +1247,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
             }
         }.start();
 
-    }
-
-    /**
-     * 获取行业分类一级菜单
-     */
-    private void getIndustryType(){
-        showWaitDialog();
-        final String url = NitConfig.getSubIndustryType;
-        new Thread(){
-            @Override
-            public void run() {
-                try {
-                    // 拼装JSON数据，向服务端发起请求
-                    JSONObject userJSON = new JSONObject();
-                    userJSON.put("id","0");
-                    userJSON.put("type","ALI");
-                    String content = String.valueOf(userJSON);
-                    Log.e("查询行业一级分类请求参数：", content);
-                    String jsonStr = HttpURLConnectionUtil.doPos(url,content);
-                    Log.e("查询行业一级分类返回字符串结果：", jsonStr);
-                    int msg = 4;
-                    String text = jsonStr;
-                    sendMessage(msg,text);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_JSON_CODE,NetworkUtils.REQUEST_JSON_TEXT);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_CODE,NetworkUtils.REQUEST_TEXT);
-                }
-            }
-        }.start();
-    }
-
-    /**
-     * 获取行业分类二级菜单
-     */
-    private void getTwoIndustryType(final int id){
-        showWaitDialog();
-        final String url = NitConfig.getSubIndustryType;
-        new Thread(){
-            @Override
-            public void run() {
-                try {
-                    // 拼装JSON数据，向服务端发起请求
-                    JSONObject userJSON = new JSONObject();
-                    userJSON.put("id", String.valueOf(id));
-                    userJSON.put("type","ALI");
-                    String content = String.valueOf(userJSON);
-                    Log.e("查询行业二级分类请求参数：", content);
-                    String jsonStr = HttpURLConnectionUtil.doPos(url,content);
-                    Log.e("查询行业二级分类返回字符串结果：", jsonStr);
-                    int msg = 5;
-                    String text = jsonStr;
-                    sendMessage(msg,text);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_JSON_CODE,NetworkUtils.REQUEST_JSON_TEXT);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_CODE,NetworkUtils.REQUEST_TEXT);
-                }
-            }
-        }.start();
-    }
-
-    /**
-     * 获取行业分类三级菜单
-     */
-    private void getThreeIndustryType(final int id){
-        showWaitDialog();
-        final String url = NitConfig.getSubIndustryType;
-        new Thread(){
-            @Override
-            public void run() {
-                try {
-                    // 拼装JSON数据，向服务端发起请求
-                    JSONObject userJSON = new JSONObject();
-                    userJSON.put("id", String.valueOf(id));
-                    userJSON.put("type","ALI");
-                    String content = String.valueOf(userJSON);
-                    Log.e("查询行业三级分类请求参数：", content);
-                    String jsonStr = HttpURLConnectionUtil.doPos(url,content);
-                    Log.e("查询行业三级分类返回字符串结果：", jsonStr);
-                    int msg = 6;
-                    String text = jsonStr;
-                    sendMessage(msg,text);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_JSON_CODE,NetworkUtils.REQUEST_JSON_TEXT);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    sendMessage(NetworkUtils.REQUEST_CODE,NetworkUtils.REQUEST_TEXT);
-                }
-            }
-        }.start();
     }
 
     private void sendMessage(int what,String text){
@@ -1626,21 +1275,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     subRateInfoJson(subRateInfoJson);
                     hideWaitDialog();
                     break;
-                case 4:
-                    String oneIndustryTypeJson = (String) msg.obj;
-                    oneIndustryTypeJson(oneIndustryTypeJson);
-                    hideWaitDialog();
-                    break;
-                case 5:
-                    String twoIndustryTypeJson = (String) msg.obj;
-                    twoIndustryTypeJson(twoIndustryTypeJson);
-                    hideWaitDialog();
-                    break;
-                case 6:
-                    String threeIndustryTypeJson = (String) msg.obj;
-                    threeIndustryTypeJson(threeIndustryTypeJson);
-                    hideWaitDialog();
-                    break;
                 case 8:
                     String busInfo = (String) msg.obj;
                     busInfo(busInfo);
@@ -1666,8 +1300,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     errorJsonText = (String) msg.obj;
                     ToastUtil.showText(context,errorJsonText,1);
                     break;
-                default:
-                    break;
             }
         }
     };
@@ -1678,7 +1310,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
                 JSONObject job  = new JSONObject(json);
                 String code = job.getString("code");
-                if("000000".equals(code)){
+                if(code.equals("000000")){
                     String dataJson = job.getString("data");
                     JSONObject dataJob = new JSONObject(dataJson);
                     String thumbnailImage = dataJob.getString("thumbnailImage");
@@ -1706,11 +1338,13 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         try {
             JSONObject job = new JSONObject(json);
             String code = job.getString("code");
-            String msg = job.getString("msg");
-            if(NetworkUtils.RESULT_CODE.equals(code)){
-                String subCode = job.getString("subCode");
-                String subMsg = job.getString("subMsg");
-                if(NetworkUtils.RESULT_SUBCODE.equals(subCode)){
+            if(code.equals("000000")){
+                String dataJson = job.getString("data");
+                JSONObject dataJob = new JSONObject(dataJson);
+                int status = dataJob.getInt("status");
+                String message = dataJob.getString("message");
+                if(status == 200){
+                    int id = dataJob.getInt("id");
                     Intent in = new Intent();
                     in.setClass(this,SubmitSuccessActivity.class);
                     in.putExtra("name",MerName);
@@ -1718,98 +1352,12 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                     //关闭除MainActivity外其余的Activity
                     BaseApplication.getInstance().noMain_exit();
                     finish();
+
                 }else{
-                    if(Utils.isNotEmpty(subMsg)){
-                        ToastUtil.showText(context,subMsg,1);
-                    }else{
-                        ToastUtil.showText(context,"获取数据失败！",1);
-                    }
+                    ToastUtil.showText(context,message,1);
                 }
             }else{
-                if(Utils.isNotEmpty(msg)){
-                    ToastUtil.showText(context,msg,1);
-                }else{
-
-                    ToastUtil.showText(context,"提交失败！",1);
-                }
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            ToastUtil.showText(context,"提交失败！",1);
-        }
-    }
-
-    private void oneIndustryTypeJson(String json){
-
-        try {
-            JSONObject job = new JSONObject(json);
-            int status = job.getInt("status");
-            String message = job.getString("message");
-            if(status == 200){
-                String dataJson = job.getString("data");
-                JSONObject obj = new JSONObject(dataJson);
-                String oneIndustryList = obj.getString("BusinessList");
-                lsOneIndustry.clear();
-                Gson gjson1  =  GsonUtils.getGson();
-                lsOneIndustry=gjson1.fromJson(oneIndustryList, new TypeToken<List<IndustryTypeData>>() {  }.getType());
-
-                Log.e("行业分类一级数据",lsOneIndustry.size()+"");
-                oneIndustryDialog(lsOneIndustry);
-
-            }else{
-                ToastUtil.showText(context,message,1);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void twoIndustryTypeJson(String json){
-
-        try {
-            JSONObject job = new JSONObject(json);
-            int status = job.getInt("status");
-            String message = job.getString("message");
-            if(status == 200){
-                String dataJson = job.getString("data");
-                JSONObject obj = new JSONObject(dataJson);
-                String oneIndustryList = obj.getString("BusinessList");
-                lsTwoIndustry.clear();
-                Gson gjson1  =  GsonUtils.getGson();
-                lsTwoIndustry=gjson1.fromJson(oneIndustryList, new TypeToken<List<IndustryTypeData>>() {  }.getType());
-
-                Log.e("行业分类二级数据",lsTwoIndustry.size()+"");
-                twoIndustryDialog(lsTwoIndustry);
-
-            }else{
-                ToastUtil.showText(context,message,1);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void threeIndustryTypeJson(String json){
-
-        try {
-            JSONObject job = new JSONObject(json);
-            int status = job.getInt("status");
-            String message = job.getString("message");
-            if(status == 200){
-                String dataJson = job.getString("data");
-                JSONObject obj = new JSONObject(dataJson);
-                String oneIndustryList = obj.getString("BusinessList");
-                lsThreeIndustry.clear();
-                Gson gjson1  =  GsonUtils.getGson();
-                lsThreeIndustry=gjson1.fromJson(oneIndustryList, new TypeToken<List<IndustryTypeData>>() {  }.getType());
-
-                Log.e("行业分类三级数据",lsThreeIndustry.size()+"");
-                threeIndustryDialog(lsThreeIndustry);
-
-            }else{
-                ToastUtil.showText(context,message,1);
+                ToastUtil.showText(context,"服务异常",1);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1821,211 +1369,31 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         try {
             JSONObject job = new JSONObject(json);
             String code = job.getString("code");
-            String msg = job.getString("msg");
-            if(NetworkUtils.RESULT_CODE.equals(code)){
-                String subCode = job.getString("subCode");
-                String subMsg = job.getString("subMsg");
-                if(NetworkUtils.RESULT_SUBCODE.equals(subCode)){
-
-                    String dataJson = job.getString("data");
-                    JSONObject dataJob = new JSONObject(dataJson);
-                    //isEmpty："1"值为1表示有数据，为0无数据
-                    String isEmpty = dataJob.getString("isEmpty");
-                    if("1".equals(isEmpty)){
-                        String agentMap = dataJob.getString("agentMap");
-                        String bsbPay = dataJob.getString("bsbPay");
-                        Gson gjson  =  GsonUtils.getGson();
-                        bus = gjson.fromJson(agentMap, BusDetailData.class);
-                        busWxAndAli = gjson.fromJson(bsbPay, BusWxAndAliDetailData.class);
-
-                        updateView();
-
-                    }
-                }else{
-                    if(Utils.isNotEmpty(subMsg)){
-                        showErrorHintDialog(subMsg);
-                    }else{
-                        showErrorHintDialog("获取数据失败");
-                    }
+            if(code.equals("000000")){
+                String dataJson = job.getString("data");
+                JSONObject dataJob = new JSONObject(dataJson);
+                //isEmpty："1"值为1表示有数据，为0无数据
+                String isEmpty = dataJob.getString("isEmpty");
+                if(isEmpty.equals("1")){
+                    String agentMap = dataJob.getString("agentMap");
+                    Gson gjson  =  GsonUtils.getGson();
+                    bus = gjson.fromJson(agentMap, BusDetailData.class);
+                    updateView();
                 }
-
             }else{
-                if(Utils.isNotEmpty(msg)){
-                    showErrorHintDialog(msg);
-                }else{
-                    showErrorHintDialog("服务异常");
-                }
-
+                ToastUtil.showText(context,"数据请求失败！",1);
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            showErrorHintDialog("获取数据失败");
         }
-    }
-
-    private void oneIndustryDialog(final List<IndustryTypeData> list){
-        oneIndustryDialog = new Dialog(context, R.style.PickerDialog);
-        //点击屏幕不消失
-        oneIndustryDialog.setCancelable(true);
-        oneIndustryDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //1：先创建子布局选择器对象
-        LayoutInflater inflater=LayoutInflater.from(context);
-        //获取dialog布局
-        View view=inflater.inflate(R.layout.city_picker_view, null);
-        RadioGroup radioGroup = view.findViewById(R.id.city_picker_radioGroup);
-        final RadioButton rbProvince = view.findViewById(R.id.city_picker_province);
-        final RadioButton rbCity = view.findViewById(R.id.city_picker_city);
-        final RadioButton rbArea = view.findViewById(R.id.city_picker_area);
-        ListView listView = view.findViewById(R.id.city_picker_listView);
-        IndustryTypeAdapter adapter = new IndustryTypeAdapter(this,list);
-        listView.setAdapter(adapter);
-        oneIndustryDialog.setContentView(view);
-        Window window = oneIndustryDialog.getWindow();
-        window.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams lp = window.getAttributes();
-//            int width = ScreenUtil.getInstance(context).getScreenWidth();
-        int width = Utils.getDisplayWidth(this);
-        int hight = Utils.getDisplayHeight(this);
-        lp.width = width;
-        lp.height = hight/2;
-        window.setAttributes(lp);
-
-
-        oneIndustryDialog.show();
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                ToastUtil.showText(context,list.get(position).getName(),1);
-                if(Utils.isFastClick(Constant.INTERVAL500)){
-                    return;
-                }
-                oneIndustryIndex = position;
-                oneIndustryName = list.get(position).getName();
-                rbProvince.setText(oneIndustryName);
-                int typeid = list.get(position).getId();
-
-                getTwoIndustryType(typeid);
-
-            }
-        });
-    }
-
-    private void twoIndustryDialog(final List<IndustryTypeData> list){
-        twoIndustryDialog = new Dialog(context, R.style.PickerDialog);
-        //点击屏幕不消失
-        twoIndustryDialog.setCancelable(true);
-        twoIndustryDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //1：先创建子布局选择器对象
-        LayoutInflater inflater=LayoutInflater.from(context);
-        //获取dialog布局
-        View view=inflater.inflate(R.layout.city_picker_view, null);
-        RadioGroup radioGroup = view.findViewById(R.id.city_picker_radioGroup);
-        final RadioButton rbProvince = view.findViewById(R.id.city_picker_province);
-        rbProvince.setText(oneIndustryName);
-        final RadioButton rbCity = view.findViewById(R.id.city_picker_city);
-        rbCity.setVisibility(View.VISIBLE);
-        RadioButton rbArea = view.findViewById(R.id.city_picker_area);
-        ListView listView = view.findViewById(R.id.city_picker_listView);
-        IndustryTypeAdapter adapter = new IndustryTypeAdapter(this,list);
-        listView.setAdapter(adapter);
-        twoIndustryDialog.setContentView(view);
-        Window window = twoIndustryDialog.getWindow();
-        window.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams lp = window.getAttributes();
-//            int width = ScreenUtil.getInstance(context).getScreenWidth();
-        int width = Utils.getDisplayWidth(this);
-        int hight = Utils.getDisplayHeight(this);
-        lp.width = width;
-        lp.height = hight/2;
-        window.setAttributes(lp);
-
-        twoIndustryDialog.show();
-        oneIndustryDialog.dismiss();
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                ToastUtil.showText(context,list.get(position).getName(),1);
-                if(Utils.isFastClick(Constant.INTERVAL500)){
-                    return;
-                }
-                twoIndustryIndex = position;
-                twoIndustryName = list.get(position).getName();
-                rbCity.setText(twoIndustryName);
-                int typeid = list.get(position).getId();
-
-                getThreeIndustryType(typeid);
-
-
-
-            }
-        });
-    }
-
-    private void threeIndustryDialog(final List<IndustryTypeData> list){
-        threeIndustryDialog = new Dialog(context, R.style.PickerDialog);
-        //点击屏幕不消失
-        threeIndustryDialog.setCancelable(true);
-        threeIndustryDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //1：先创建子布局选择器对象
-        LayoutInflater inflater=LayoutInflater.from(context);
-        //获取dialog布局
-        View view=inflater.inflate(R.layout.city_picker_view, null);
-        RadioGroup radioGroup = view.findViewById(R.id.city_picker_radioGroup);
-        final RadioButton rbProvince = view.findViewById(R.id.city_picker_province);
-        final RadioButton rbCity = view.findViewById(R.id.city_picker_city);
-        final RadioButton rbArea = view.findViewById(R.id.city_picker_area);
-        rbProvince.setText(oneIndustryName);
-        rbCity.setVisibility(View.VISIBLE);
-        rbCity.setText(twoIndustryName);
-        rbArea.setVisibility(View.VISIBLE);
-        ListView listView = view.findViewById(R.id.city_picker_listView);
-        IndustryTypeAdapter adapter = new IndustryTypeAdapter(this,list);
-        listView.setAdapter(adapter);
-        threeIndustryDialog.setContentView(view);
-        Window window = threeIndustryDialog.getWindow();
-        window.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams lp = window.getAttributes();
-//            int width = ScreenUtil.getInstance(context).getScreenWidth();
-        int width = Utils.getDisplayWidth(this);
-        int hight = Utils.getDisplayHeight(this);
-        lp.width = width;
-        lp.height = hight/2;
-        window.setAttributes(lp);
-
-
-        threeIndustryDialog.show();
-        twoIndustryDialog.dismiss();
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                ToastUtil.showText(context,list.get(position).getName(),1);
-                if(Utils.isFastClick(Constant.INTERVAL500)){
-                    return;
-                }
-                threeIndustryIndex = position;
-                threeIndustryName = list.get(position).getName();
-
-                threeIndustryType = list.get(position);
-                rbArea.setText(threeIndustryName);
-                oneIndustryType = lsOneIndustry.get(oneIndustryIndex);
-                twoIndustryType = lsTwoIndustry.get(twoIndustryIndex);
-                aliCtgyidText.setText(oneIndustryType.getName()+"/"+twoIndustryType.getName()+"/"+threeIndustryType.getName());
-                threeIndustryDialog.dismiss();
-
-
-            }
-        });
     }
 
 
     /**
      * 背景渐变暗
      */
-    private void setWindowBackground(boolean isUpload){
-        PhotoPopupWindow popupWindow = new PhotoPopupWindow(this,isUpload);
+    private void setWindowBackground(){
+        PhotoPopupWindow popupWindow = new PhotoPopupWindow(this);
         popupWindow.showPhotoWindow();
         popupWindow.setOnSelectClickListener(this);
         popupWindow.showAtLocation(myLayout, Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL,0,0);
@@ -2067,8 +1435,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     }
 
 
-
-
     /**
      * 返回或者点击空白位置的时候将背景透明度改回来
      */
@@ -2103,66 +1469,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
     }
 
     /**
-     *  显示错误提示框
-     **/
-    private void showErrorHintDialog(String msgText){
-        View view = LayoutInflater.from(activity).inflate(R.layout.error_hint_dialog, null);
-        TextView tvHintTitle = (TextView) view.findViewById(R.id.error_hint_dialog_tvHintTitle);
-        TextView tvHintText = (TextView) view.findViewById(R.id.error_hint_dialog_tvHintText);
-        TextView btok = (TextView) view.findViewById(R.id.error_hint_dialog_tvOk);
-        final Dialog myDialog = new Dialog(activity,R.style.dialog);
-        Window dialogWindow = myDialog.getWindow();
-        WindowManager.LayoutParams params = myDialog.getWindow().getAttributes(); // 获取对话框当前的参数值
-        dialogWindow.setAttributes(params);
-        myDialog.setContentView(view);
-        tvHintText.setText(msgText);
-        btok.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                finish();
-                myDialog.dismiss();
-
-            }
-        });
-
-        myDialog.show();
-        myDialog.setCancelable(false);
-    }
-
-    /**
-     *  显示确认提示框
-     **/
-    private void showDelateHintDialog(){
-        View view = LayoutInflater.from(activity).inflate(R.layout.operation_hint_dialog, null);
-        TextView btok = (TextView) view.findViewById(R.id.operation_hint_tvOk);
-        TextView btCancel = (TextView) view.findViewById(R.id.operation_hint_tvCancel);
-        final Dialog myDialog = new Dialog(activity,R.style.dialog);
-        Window dialogWindow = myDialog.getWindow();
-        WindowManager.LayoutParams params = myDialog.getWindow().getAttributes(); // 获取对话框当前的参数值
-        dialogWindow.setAttributes(params);
-        myDialog.setContentView(view);
-        btok.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                deleteImg();
-                myDialog.dismiss();
-
-            }
-        });
-        btCancel.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                myDialog.dismiss();
-            }
-        });
-        myDialog.show();
-    }
-
-    /**
      * 启动相册
      */
     private void intentGallery(){
@@ -2177,335 +1483,133 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         mPhotoModule.takePhoto(PhotoModule.REQUEST_CODE_CAMERA);
     }
 
-    /**
-     * 删除
-     */
-    private void deleteImg(){
-        String imgPath = null;
-        if("1".equals(selectImg)){
-            imgLicensePath = null;
-            yt_imgLicensePath = null;
-            setImgView(imgLicense,imgPath);
-        }
-        if("2".equals(selectImg)){
-            //法人正面
-            imgLegalPersonJustPath = null;
-            yt_imgLegalPersonJustPath = null;
-            setImgView(imgLegalPersonJust,imgPath);
-        }
-        if("3".equals(selectImg)){
-            //法人反面
-            imgLegalPersonBackPath = null;
-            yt_imgLegalPersonBackPath = null;
-            setImgView(imgLegalPersonBack,imgPath);
-
-        }
-        if("4".equals(selectImg)){
-            //银行卡正面
-            imgBankCardJustPath = null;
-            yt_imgBankCardJustPath = null;
-            setImgView(imgBankCardJust,imgPath);
-
-        }
-        if("5".equals(selectImg)){
-            //银行卡反面
-            imgBankCardBackPath = null;
-            yt_imgBankCardBackPath = null;
-            setImgView(imgBankCardBack,imgPath);
-
-        }
-        if("6".equals(selectImg)){
-            //商户门头照
-            imgMerDoorheadPath = null;
-            yt_imgMerDoorheadPath = null;
-            setImgView(imgMerDoorhead,imgPath);
-
-        }
-        if("7".equals(selectImg)){
-            //门店前台照
-            imgMerReceptionPath = null;
-            yt_imgMerReceptionPath = null;
-            setImgView(imgMerReception,imgPath);
-        }
-        if("8".equals(selectImg)){
-            //开户许可证
-            imgOpeningPermitPath = null;
-            yt_imgOpeningPermitPath = null;
-            setImgView(imgOpeningPermit,imgPath);
-        }
-        if("9".equals(selectImg)){
-            //商户关系证明照
-            imgMerRelationPath = null;
-            yt_imgMerRelationPath = null;
-            setImgView(imgMerRelation,imgPath);
-        }
-        if("10".equals(selectImg)){
-            //结算人身份证正面
-            imgSettPersonJustPath = null;
-            yt_imgSettPersonJustPath = null;
-            setImgView(imgSettPersonJust,imgPath);
-        }
-        if("11".equals(selectImg)){
-            imgSettPersonBackPath = null;
-            yt_imgSettPersonBackPath = null;
-            setImgView(imgSettPersonBack,imgPath);
-        }
-        if("12".equals(selectImg)){
-            //总分店关系照
-            imgMerZFDRelationPath = "";
-            yt_imgMerZFDRelationPath = "";
-            setImgView(imgMerZFDRelation,imgPath);
-
-        }
-        if("13".equals(selectImg)){
-            //商户增值协议
-            imgMerXYPath = "";
-            yt_imgMerXYPath = "";
-            setImgView(imgMerXY,imgPath);
-        }
-        if("14".equals(selectImg)){
-            //机构代码证
-            imgJGDMZPath = null;
-            yt_imgJGDMZPath = null;
-            setImgView(imgJGDMZ,imgPath);
-        }
-        if("15".equals(selectImg)){
-            //税务登记证
-            imgSWDJZPath = null;
-            yt_imgSWDJZPath = null;
-            setImgView(imgSWDJZ,imgPath);
-        }
-        if("16".equals(selectImg)){
-            //联系人正面
-            imgPersonAPath = null;
-            yt_imgPersonAPath = null;
-            setImgView(imgPersonA,imgPath);
-        }
-        if("17".equals(selectImg)){
-            //联系人反面
-            imgPersonBPath = null;
-            yt_imgPersonBPath = null;
-            setImgView(imgPersonB,imgPath);
-        }
-
-
-    }
-
-    /**
-     * 查看大图
-     */
-    private void seeOriginalImg(){
-        String imgPath = "";
-        if("1".equals(selectImg)){
-            imgPath = yt_imgLicensePath;
-        }
-        if("2".equals(selectImg)){
-            //法人正面
-            imgPath = yt_imgLegalPersonJustPath;
-        }
-        if("3".equals(selectImg)){
-            //法人反面
-            imgPath = yt_imgLegalPersonBackPath;
-
-        }
-        if("4".equals(selectImg)){
-            //银行卡正面
-            imgPath = yt_imgBankCardJustPath;
-
-        }
-        if("5".equals(selectImg)){
-            //银行卡反面
-            imgPath = yt_imgBankCardBackPath;
-
-        }
-        if("6".equals(selectImg)){
-            //商户门头照
-            imgPath = yt_imgMerDoorheadPath;
-
-        }
-        if("7".equals(selectImg)){
-            //门店前台照
-            imgPath = yt_imgMerReceptionPath;
-        }
-        if("8".equals(selectImg)){
-            //开户许可证
-            imgPath = yt_imgOpeningPermitPath;
-        }
-        if("9".equals(selectImg)){
-            //商户关系证明照
-            imgPath = yt_imgMerRelationPath;
-        }
-        if("10".equals(selectImg)){
-            //结算人身份证正面
-            imgPath = yt_imgSettPersonJustPath;
-        }
-        if("11".equals(selectImg)){
-            imgPath = yt_imgSettPersonBackPath;
-        }
-        if("12".equals(selectImg)){
-            //总分店关系照
-            imgPath = yt_imgMerZFDRelationPath;
-
-        }
-        if("13".equals(selectImg)){
-            //商户增值协议
-            imgPath = yt_imgMerXYPath;
-        }
-        if("14".equals(selectImg)){
-            //机构代码证
-            imgPath = yt_imgJGDMZPath;
-        }
-        if("15".equals(selectImg)){
-            //税务登记证
-            imgPath = yt_imgSWDJZPath;
-        }
-        if("16".equals(selectImg)){
-            //联系人正面
-            imgPath = yt_imgPersonAPath;
-        }
-        if("17".equals(selectImg)){
-            //联系人反面
-            imgPath = yt_imgPersonBPath;
-        }
-        if(Utils.isNotEmpty(imgPath)){
-            Intent intent = new Intent();
-            intent.setClass(activity,SeeOriginalImgActivity.class);
-            intent.putExtra("imgPath",imgPath);
-            startActivity(intent);
-        }else{
-            ToastUtil.showText(activity,"找不到图片地址，请重新上传！",1);
-        }
-
-    }
-
-    /**
-     * ImageView赋值占位图
-     */
-    private void setImgView(ImageView imgView,String imgPath){
-        //占位图
-        RequestOptions options = new RequestOptions()
-                .placeholder(R.drawable.option_icon);
-
-        if(Utils.isNotEmpty(imgPath)){
+    private void setImgBitmap(String imgPath,String ytImgPath){
+        if(selectImg.equals("1")){
+            imgLicensePath = imgPath;
+            yt_imgLicensePath = ytImgPath;
+            //占位图
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.drawable.option_icon);
             Glide.with(this)
                     .load(imgPath)
                     .apply(options)
-                    .into(imgView);
-        }else{
-            imgView.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.add_img_icon));
+                    .into(imgLicense);
         }
-
-    }
-
-    /**
-     * 加载图片
-     */
-    private void setImgBitmap(String imgPath,String ytImgPath){
-
-        if("1".equals(selectImg)){
-            imgLicensePath = imgPath;
-            yt_imgLicensePath = ytImgPath;
-            setImgView(imgLicense,imgPath);
-        }
-        if("2".equals(selectImg)){
+        if(selectImg.equals("2")){
             //法人正面
             imgLegalPersonJustPath = imgPath;
             yt_imgLegalPersonJustPath = ytImgPath;
-            setImgView(imgLegalPersonJust,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgLegalPersonJust);
         }
-        if("3".equals(selectImg)){
+        if(selectImg.equals("3")){
             //法人反面
             imgLegalPersonBackPath = imgPath;
             yt_imgLegalPersonBackPath = ytImgPath;
-            setImgView(imgLegalPersonBack,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgLegalPersonBack);
 
         }
-        if("4".equals(selectImg)){
+        if(selectImg.equals("4")){
             //银行卡正面
             imgBankCardJustPath = imgPath;
             yt_imgBankCardJustPath = ytImgPath;
-            setImgView(imgBankCardJust,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgBankCardJust);
 
         }
-        if("5".equals(selectImg)){
+        if(selectImg.equals("5")){
             //银行卡反面
             imgBankCardBackPath = imgPath;
             yt_imgBankCardBackPath = ytImgPath;
-            setImgView(imgBankCardBack,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgBankCardBack);
 
         }
-        if("6".equals(selectImg)){
+        if(selectImg.equals("6")){
             //商户门头照
             imgMerDoorheadPath = imgPath;
             yt_imgMerDoorheadPath = ytImgPath;
-            setImgView(imgMerDoorhead,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgMerDoorhead);
 
         }
-        if("7".equals(selectImg)){
+        if(selectImg.equals("7")){
             //门店前台照
             imgMerReceptionPath = imgPath;
             yt_imgMerReceptionPath = ytImgPath;
-            setImgView(imgMerReception,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgMerReception);
         }
-        if("8".equals(selectImg)){
+        if(selectImg.equals("8")){
             //开户许可证
             imgOpeningPermitPath = imgPath;
             yt_imgOpeningPermitPath = ytImgPath;
-            setImgView(imgOpeningPermit,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgOpeningPermit);
         }
-        if("9".equals(selectImg)){
+        if(selectImg.equals("9")){
             //商户关系证明照
             imgMerRelationPath = imgPath;
             yt_imgMerRelationPath = ytImgPath;
-            setImgView(imgMerRelation,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgMerRelation);
         }
-        if("10".equals(selectImg)){
+        if(selectImg.equals("10")){
             //结算人身份证正面
             imgSettPersonJustPath = imgPath;
             yt_imgSettPersonJustPath = ytImgPath;
-            setImgView(imgSettPersonJust,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgSettPersonJust);
         }
-        if("11".equals(selectImg)){
+        if(selectImg.equals("11")){
             imgSettPersonBackPath = imgPath;
             yt_imgSettPersonBackPath = ytImgPath;
-            setImgView(imgSettPersonBack,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgSettPersonBack);
         }
-        if("12".equals(selectImg)){
+        if(selectImg.equals("12")){
             //总分店关系照
             imgMerZFDRelationPath = imgPath;
             yt_imgMerZFDRelationPath = ytImgPath;
-            setImgView(imgMerZFDRelation,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgMerZFDRelation);
 
         }
-        if("13".equals(selectImg)){
+        if(selectImg.equals("13")){
             //商户增值协议
             imgMerXYPath = imgPath;
             yt_imgMerXYPath = ytImgPath;
-            setImgView(imgMerXY,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgMerXY);
         }
-        if("14".equals(selectImg)){
+        if(selectImg.equals("14")){
             //机构代码证
             imgJGDMZPath = imgPath;
             yt_imgJGDMZPath = ytImgPath;
-            setImgView(imgJGDMZ,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgJGDMZ);
         }
-        if("15".equals(selectImg)){
+        if(selectImg.equals("15")){
             //税务登记证
             imgSWDJZPath = imgPath;
             yt_imgSWDJZPath = ytImgPath;
-            setImgView(imgSWDJZ,imgPath);
-        }
-        if("16".equals(selectImg)){
-            //税务登记证
-            imgPersonAPath = imgPath;
-            yt_imgPersonAPath = ytImgPath;
-            setImgView(imgPersonA,imgPath);
-        }
-        if("17".equals(selectImg)){
-            //税务登记证
-            imgPersonBPath = imgPath;
-            yt_imgPersonBPath = ytImgPath;
-            setImgView(imgPersonB,imgPath);
+            Glide.with(this)
+                    .load(imgPath)
+                    .into(imgSWDJZ);
         }
         hideWaitDialog();
     }
@@ -2513,24 +1617,8 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
     @Override
     public void onClick(View v) {
-        //判断当前是上传还是撤销操作
-        boolean isUpload = true;
         switch (v.getId()){
-            case R.id.rate_info_aliCtgyidText://经营类目选择
-                if(Utils.isFastClick(Constant.INTERVAL500)){
-                    return;
-                }
-                if(lsOneIndustry!=null&&lsOneIndustry.size()>=1){
-                    oneIndustryDialog(lsOneIndustry);
-                }else{
-                    getIndustryType();
-                }
-                break;
             case R.id.rate_info_wxRateReduce:
-                if(busWxAndAli != null){
-                    ToastUtil.showText(context,"暂不支持修改费率！",1);
-                    return;
-                }
                 if(wxRate<=wxMinRate){
                     return;
                 }
@@ -2538,10 +1626,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                 etWxRate.setText(String.valueOf(wxRate));
                 break;
             case R.id.rate_info_wxRateAdd:
-                if(busWxAndAli != null){
-                    ToastUtil.showText(context,"暂不支持修改费率！",1);
-                    return;
-                }
                 if(wxRate>=wxMaxRate){
                     return;
                 }
@@ -2549,10 +1633,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                 etWxRate.setText(String.valueOf(wxRate));
                 break;
             case R.id.rate_info_aliRateReduce:
-                if(busWxAndAli != null){
-                    ToastUtil.showText(context,"暂不支持修改费率！",1);
-                    return;
-                }
                 if(aliRate<=aliMinRate){
                     return;
                 }
@@ -2560,10 +1640,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                 etAliRate.setText(String.valueOf(aliRate));
                 break;
             case R.id.rate_info_aliRateAdd:
-                if(busWxAndAli != null){
-                    ToastUtil.showText(context,"暂不支持修改费率！",1);
-                    return;
-                }
                 if(aliRate>=aliMaxRate){
                     return;
                 }
@@ -2642,176 +1718,85 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                 break;
             case R.id.rate_info_imgLicense://营业执照
                 selectImg = "1";
-                if(Utils.isNotEmpty(imgLicensePath)||Utils.isNotEmpty(yt_imgLicensePath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
-
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgLegalPersonJust://法人正面
                 selectImg = "2";
-                if(Utils.isNotEmpty(imgLegalPersonJustPath)||Utils.isNotEmpty(yt_imgLegalPersonJustPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgLegalPersonBack://法人反面
                 selectImg = "3";
-                if(Utils.isNotEmpty(imgLegalPersonBackPath)||Utils.isNotEmpty(yt_imgLegalPersonBackPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgBankCardJust://银行卡正面
                 selectImg = "4";
-                if(Utils.isNotEmpty(imgBankCardJustPath)||Utils.isNotEmpty(yt_imgBankCardJustPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgBankCardBack://银行卡反面
                 selectImg = "5";
-                if(Utils.isNotEmpty(imgBankCardBackPath)||Utils.isNotEmpty(yt_imgBankCardBackPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgMerDoorhead://商户门头照
                 selectImg = "6";
-                if(Utils.isNotEmpty(imgMerDoorheadPath)||Utils.isNotEmpty(yt_imgMerDoorheadPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgMerReception://门店前台照
                 selectImg = "7";
-                if(Utils.isNotEmpty(imgMerReceptionPath)||Utils.isNotEmpty(yt_imgMerReceptionPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgOpeningPermit://开户许可照
                 selectImg = "8";
-                if(Utils.isNotEmpty(imgOpeningPermitPath)||Utils.isNotEmpty(yt_imgOpeningPermitPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgMerRelation://商户关系照
                 selectImg = "9";
-                if(Utils.isNotEmpty(imgMerRelationPath)||Utils.isNotEmpty(yt_imgMerRelationPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgSettPersonJust://结算人正面
                 selectImg = "10";
-                if(Utils.isNotEmpty(imgSettPersonJustPath)||Utils.isNotEmpty(yt_imgSettPersonJustPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgSettPersonBack://结算人反面
                 selectImg = "11";
-                if(Utils.isNotEmpty(imgSettPersonBackPath)||Utils.isNotEmpty(yt_imgSettPersonBackPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgMerZFDRelation://商户总分店关系
                 selectImg = "12";
-                if(Utils.isNotEmpty(imgMerZFDRelationPath)||Utils.isNotEmpty(yt_imgMerZFDRelationPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgMerXY://商户增值协议
                 selectImg = "13";
-                if(Utils.isNotEmpty(imgMerXYPath)||Utils.isNotEmpty(yt_imgMerXYPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgJGDMZ://机构代码证
                 selectImg = "14";
-                if(Utils.isNotEmpty(imgJGDMZPath)||Utils.isNotEmpty(yt_imgJGDMZPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.rate_info_imgSWDJZ://税务登记证
                 selectImg = "15";
-                if(Utils.isNotEmpty(imgSWDJZPath)||Utils.isNotEmpty(yt_imgSWDJZPath)){
-                    isUpload = false;
-                }
                 //背景渐变暗
-                setWindowBackground(isUpload);
-                break;
-            case R.id.rate_info_img_person_a://联系人正面
-                selectImg = "16";
-                if(Utils.isNotEmpty(imgPersonAPath)||Utils.isNotEmpty(yt_imgPersonAPath)){
-                    isUpload = false;
-                }
-                //背景渐变暗
-                setWindowBackground(isUpload);
-                break;
-            case R.id.rate_info_img_person_b://联系人反面
-                selectImg = "17";
-                if(Utils.isNotEmpty(imgPersonBPath)||Utils.isNotEmpty(yt_imgPersonBPath)){
-                    isUpload = false;
-                }
-                //背景渐变暗
-                setWindowBackground(isUpload);
+                setWindowBackground();
                 break;
             case R.id.account_rate_btSubmit:
-                if(Utils.isFastClick(Constant.INTERVAL1000)){
+                if(Utils.isFastClick()){
                     return;
                 }
                 //本地验证
                 subTextVerification();
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()){
-            case R.id.rate_info_wxSwitch:
-                if(isChecked){
-                    wxChecked = true;
-                    wxLayout.setVisibility(View.VISIBLE);
-                }else{
-                    wxChecked = false;
-                    wxLayout.setVisibility(View.GONE);
-                }
-                break;
-            case R.id.rate_info_aliSwitch:
-                if(isChecked){
-                    aliChecked = true;
-                    aliLayout.setVisibility(View.VISIBLE);
-                }else{
-                    aliChecked = false;
-                    aliLayout.setVisibility(View.GONE);
-                }
-                break;
-
-            default:
                 break;
         }
     }
@@ -2821,15 +1806,9 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         if(type == 1){
             //访问相册
             intentGallery();
-        }else if(type == 2){
+        }else{
             //拍照
             intentCamera();
-        }else if(type == 3){
-            //删除
-            showDelateHintDialog();
-        }else {
-            //查看大图
-            seeOriginalImg();
         }
     }
 
@@ -2843,7 +1822,7 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
         int degree = 0;//原图片角度
         Bitmap bitmap = null;//原图片
         Bitmap newBitmap = null;//新图片图片
-        if (resultCode == RESULT_OK) {
+        if (resultCode == this.RESULT_OK) {
             switch (requestCode){
                 case PhotoModule.REQUEST_CODE_CROP_PHOTO://相册返回
                     if(resultCode == RESULT_CANCELED){
@@ -2964,8 +1943,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
 
                     */
                     break;
-                default:
-                    break;
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -2988,8 +1965,6 @@ public class AptitudeRateActivity extends BaseActivity implements CompoundButton
                      * 可根据自己的需求定制对话框，点击某个按钮在执行下面的代码
                      */
                 }
-                break;
-            default:
                 break;
         }
     }

@@ -58,9 +58,7 @@ public class XListViewFooter extends LinearLayout {
 	}
 	
 	public void setBottomMargin(int height) {
-		if (height < 0) {
-			return ;
-		}
+		if (height < 0) return ;
 		LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)mContentView.getLayoutParams();
 		lp.bottomMargin = height;
 		mContentView.setLayoutParams(lp);

@@ -30,10 +30,6 @@
             android:orientation="horizontal"
             android:paddingLeft="10dp"
             >
-            <!--
-                android:textColor="@drawable/tab_text_selector"
-                android:background="@drawable/order_list_tab_line_selector"
-            -->
             <RadioButton
                 android:id="@+id/city_picker_province"
                 android:layout_width="wrap_content"
@@ -42,6 +38,8 @@
                 android:button="@null"
                 android:gravity="center"
                 android:layout_gravity="center"
+                android:textColor="@drawable/tab_text_selector"
+                android:background="@drawable/order_list_tab_line_selector"
                 />
             <RadioButton
                 android:id="@+id/city_picker_city"
@@ -51,6 +49,8 @@
                 android:button="@null"
                 android:gravity="center"
                 android:layout_gravity="center"
+                android:textColor="@drawable/tab_text_selector"
+                android:background="@drawable/order_list_tab_line_selector"
                 android:layout_marginLeft="15dp"
                 android:visibility="invisible"
                 />
@@ -62,6 +62,8 @@
                 android:button="@null"
                 android:gravity="center"
                 android:layout_gravity="center"
+                android:textColor="@drawable/tab_text_selector"
+                android:background="@drawable/order_list_tab_line_selector"
                 android:layout_marginLeft="15dp"
                 android:visibility="invisible"
                 />

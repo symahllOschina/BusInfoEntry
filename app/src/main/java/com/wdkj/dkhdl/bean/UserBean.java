@@ -9,7 +9,7 @@ public class UserBean implements Serializable{
 
 
 
-    private String name;
+    private String name;//商户名称
     private String agent_id;//代理id
     private String salesman_id;//id
     private String role;//角色

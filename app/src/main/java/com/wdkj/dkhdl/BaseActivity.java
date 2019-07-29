@@ -146,6 +146,9 @@ public class BaseActivity extends AppCompatActivity {
     public void onBackPressed() {
         hideWaitDialog();
         onBack(map);
+
+
+
     }
 
     private void onBack(Map<String,String> map){

@@ -220,9 +220,7 @@ public class XListView extends ListView implements OnScrollListener {
 	private void resetHeaderHeight() {
 		int height = mHeaderView.getVisiableHeight();
 		if (height == 0) // not visible.
-		{
 			return;
-		}
 		// refreshing and header isn't shown fully. do nothing.
 		if (mPullRefreshing && height <= mHeaderViewHeight) {
 			return;

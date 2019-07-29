@@ -7,8 +7,6 @@ import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.*;
-
 /**
  * 数字操作工具类
  */
@@ -114,7 +112,7 @@ public class DecimalUtil {
 	 *  用正则表达式，判断是否为整数
 	 */
     public static boolean isNumeric(String str){
-        Pattern pattern = compile("[0-9]*");
+        Pattern pattern = Pattern.compile("[0-9]*");
         Matcher isNum = pattern.matcher(str);
         if( !isNum.matches() ){  
             return false;   

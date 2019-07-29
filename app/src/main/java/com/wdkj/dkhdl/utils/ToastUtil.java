@@ -44,7 +44,6 @@ public class ToastUtil extends Toast{
         }
     }
 
-    @Override
     public void cancel() {
         try {
             super.cancel();

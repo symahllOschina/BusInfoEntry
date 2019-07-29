@@ -106,13 +106,6 @@ public class FileUtilcll {
         File file = new File(filePath);
         //将要保存图片的路径
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-        /**
-         *
-         Bitmap.CompressFormat format 图像的压缩格式；
-         int quality 图像压缩率，0-100。 0 压缩100%，100意味着不压缩；
-         OutputStream stream 写入压缩数据的输出流；
-
-         */
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
         bos.flush(); bos.close();
         return file;
@@ -165,9 +158,6 @@ public class FileUtilcll {
                     break;
                 case ExifInterface.ORIENTATION_ROTATE_270:
                     degree = 270;
-                    break;
-                default:
-
                     break;
             }
         } catch (IOException e) {

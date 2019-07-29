@@ -4,42 +4,11 @@ package com.wdkj.dkhdl;
  */
 public class Constant {
 
-    public static final int INTERVAL1000 = 1000;
-    public static final int INTERVAL500 = 500;
-
     /**
-     * 第一页 商户类型
-     * 一级商户："1"
-     * 二级商户："2"
-     */
-    public static final String merchantTypeList[] = {"一级商户","二级商户"};
-    public static final String merchantTypeStrList[] = {"1","2"};
-
-    public static final String getMerchantType(String str){
-        if(str.equals(merchantTypeList[0])){
-            return merchantTypeStrList[0];
-        }else if(str.equals(merchantTypeList[1])){
-            return merchantTypeStrList[1];
-        }
-        return "";
-    }
-
-
-    public static final int getMerchantTypeIndex(String str){
-        if(str.equals(merchantTypeStrList[0])){
-            return 0;
-        }else if(str.equals(merchantTypeStrList[1])){
-            return 1;
-        }
-        return 0;
-    }
-
-    /**
-     * 第二页入网类型netTypeList的值分别对应"QY","GT","XW"
+     * netTypeList的值分别对应"QY","GT","XW"
      */
     public static final String netTypeList[] = {"企业","个体工商户"};
     public static final String netTypeStrList[] = {"QY","GT"};
-
 
     public static final String getNetType(String str){
         if(str.equals(netTypeList[0])){
@@ -60,9 +29,6 @@ public class Constant {
         return 0;
     }
 
-    /**
-     * 第二页入网证件类型
-     */
     public static final String netLicenseTypeList[] = {"三证合一","营业执照"};
     public static final String netLicenseStrTypeList[] = {"SZHY","YYZZ"};
 
@@ -83,7 +49,6 @@ public class Constant {
         }
         return 0;
     }
-
 
 
 

@@ -151,7 +151,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener{
      *  登录账号1110007密码123456
      *  登录账号2810042密码123456
      */
-    protected void doLogin(final String account,String passwd){
+    private void doLogin(final String account,String passwd){
         if(!NetworkUtils.isNetworkAvailable(this)){
             ToastUtil.showText(LoginActivity.this,"请检查网络是否连接...",1);
             return;
@@ -239,9 +239,6 @@ public class LoginActivity extends BaseActivity implements OnClickListener{
                         loginDialog.dismiss();
                     }
                     break;
-                default:
-
-                    break;
             }
         }
     };
@@ -253,39 +250,21 @@ public class LoginActivity extends BaseActivity implements OnClickListener{
             JSONObject job = new JSONObject(json);
             String code = job.getString("code");
             String msg = job.getString("msg");
-            if(NetworkUtils.RESULT_CODE.equals(code)){
-                String subCode = job.getString("subCode");
-                String subMsg = job.getString("subMsg");
-                if(NetworkUtils.RESULT_SUBCODE.equals(subCode)){
-                    String dataJson = job.getString("data");
-                    //保存用户名和密码
-                    sharedPreferencesUtil.put("account",accountStr);
-                    sharedPreferencesUtil.put("passwd",passwdStr);
-                    Gson gson = GsonUtils.getGson();
-                    UserBean userBean = gson.fromJson(dataJson,UserBean.class);
-                    try {
-                        MySerialize.saveObject("user",this,MySerialize.serialize(userBean));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
-                    }
-                    intoMainActivity();
-                }else{
-                    if(Utils.isNotEmpty(subMsg)){
-                        ToastUtil.showText(context,subMsg,1);
-                    }else{
-                        ToastUtil.showText(context,"登录失败！",1);
-                    }
-
-                    //清除本地账号信息：
-                    sharedPreferencesUtil.clear();
-                    Intent intent=new Intent();
-                    intent.setClass(this, WelComeActivity.class);
-                    startActivity(intent);
-                    BaseApplication.getInstance().exit();
+            if(code.equals("000000")){
+                String dataJson = job.getString("data");
+                //保存用户名和密码
+                sharedPreferencesUtil.put("account",accountStr);
+                sharedPreferencesUtil.put("passwd",passwdStr);
+                Gson gson = GsonUtils.getGson();
+                UserBean userBean = gson.fromJson(dataJson,UserBean.class);
+                try {
+                    MySerialize.saveObject("user",this,MySerialize.serialize(userBean));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    sendMessage(NetworkUtils.REQUEST_IO_CODE,NetworkUtils.REQUEST_IO_TEXT);
                 }
-
+                intoMainActivity();
             }else{
                 if(Utils.isNotEmpty(msg)){
                     ToastUtil.showText(context,msg,1);
@@ -303,12 +282,6 @@ public class LoginActivity extends BaseActivity implements OnClickListener{
         } catch (JSONException e) {
             e.printStackTrace();
             snackError("登录异常！");
-            //清除本地账号信息：
-            sharedPreferencesUtil.clear();
-            Intent intent=new Intent();
-            intent.setClass(this, WelComeActivity.class);
-            startActivity(intent);
-            BaseApplication.getInstance().exit();
         }
     }
 
@@ -335,11 +308,8 @@ public class LoginActivity extends BaseActivity implements OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.login_activity_btSubmit://提交、登录
+//                intoMainActivity();
                 attemptLogin();
-//                int a = 1 / 0;
-                break;
-            default:
-
                 break;
         }
     }

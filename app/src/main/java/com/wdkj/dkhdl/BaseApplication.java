@@ -3,11 +3,12 @@ package com.wdkj.dkhdl;
 import android.app.Activity;
 import android.app.Application;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
-
-import com.wdkj.dkhdl.utils.CrashHandler;
+import android.widget.Toast;
 
 import org.xutils.x;
 
@@ -36,9 +37,6 @@ public class BaseApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
-        //注册全局捕获异常类
-//        CrashHandler.getInstance().init(this);
-
         myApp = this;
         x.Ext.init(this);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -82,8 +80,6 @@ public class BaseApplication extends Application{
                 activityList.remove(activity);
             }
         });
-
-
     }
 
     // 保存打开的Actviity到集合中
@@ -95,8 +91,8 @@ public class BaseApplication extends Application{
         for (Activity activity: activityList) {
             activity.finish();
         }
-        //结束应用进程(加上以下会出现切换黑屏)
-//        android.os.Process.killProcess(android.os.Process.myPid());
+        //结束应用进程
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     //关闭除MianActivity外list内的其余的activity
@@ -124,23 +120,11 @@ public class BaseApplication extends Application{
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (newConfig.fontScale != 1)//非默认值
-            {
-                getResources();
-            }
-
+            getResources();
         super.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public Resources getResources() {
-        Resources res = super.getResources();
-        if (res.getConfiguration().fontScale != 1) {//非默认值
-            Configuration newConfig = new Configuration();
-            newConfig.setToDefaults();//设置默认
-            res.updateConfiguration(newConfig, res.getDisplayMetrics());
-        }
-        return res;
-    }
+
 
 
 }

@@ -8,14 +8,8 @@ public class IndustryTypeData implements Serializable{
 
     private Integer id;//: 1,
     private Integer fid;//: 0,
-    private String tid;//: null,
+    private Integer tid;//: null,
     private String name;// "企业"
-    /**
-     *微信支付宝行业类型，默认微信  WX
-     * 微信：WX
-     * 支付宝：ALI
-     */
-    private String type;
 
 
 
@@ -38,11 +32,11 @@ public class IndustryTypeData implements Serializable{
         this.fid = fid;
     }
 
-    public String getTid() {
+    public Integer getTid() {
         return tid;
     }
 
-    public void setTid(String tid) {
+    public void setTid(Integer tid) {
         this.tid = tid;
     }
 
@@ -52,14 +46,5 @@ public class IndustryTypeData implements Serializable{
 
     public void setName(String name) {
         this.name = name;
-    }
-
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

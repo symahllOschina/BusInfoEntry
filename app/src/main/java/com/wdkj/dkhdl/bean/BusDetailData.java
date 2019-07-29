@@ -24,15 +24,11 @@ public class BusDetailData implements Serializable{
     private String merchant_county_code;//商户所在区县
     private String merchant_address;//商户详细地址  "1部",
     private String merchant_person;//商户联系人  "1255",
-    private String person_id_no;//联系人身份证号码
-    private String person_id_expire;//证件有效期
-    private String person_id_expire_long;//有效期是否长期有效 默认不选中值为"N",长期有效时为"Y
     private String merchant_phone;//联系人电话"15253625362",
     private String merchant_email;//联系人邮箱 "yggv@qq.co"
     private String business_type1_code;//": "1",//行业类目一级
     private String business_type2_code;//": "8"//行业类目二级
     private String business_type3_code;//": "10",//行业类目三级
-    private String merchant_type;//商户类型1：一级商户，2：二级商户
 
     /** 第一页信息回显特别字段 */
     private String business_type1_name;//": "企业",
@@ -48,24 +44,17 @@ public class BusDetailData implements Serializable{
     private String settlement_mer_type;//入网类型"QY",
     private String licenseno;//执照证件号码 "952358769822536587",
     private String licensen_expire;//证件到期日期  "1548172800000",
-    private String licensen_expire_long;//是否长期有效 默认不选中值为"N",长期有效时为"Y
+    private String licensen_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
     private String account_type;//结算账户类型：对公 = 1，对私 = 2； "1",
     private String document_type;//入网证件类型,默认为三证合一：SZHY,营业执照：YYZZ
     private String is_liable_account;//是否法人入账，法人入账 = 1，非法人入账 = 2；
     private String legal_name;//法人姓名
-    private String legal_phone;//法人手机号
-    private String merchant_id_type;//证件类型
     private String merchant_id_no;//法人身份证号 "61012519910426624X",
     private String merchant_id_expire;//法人身份证号有效期 "1548172800000",
-    private String merchant_id_expire_long;//是否长期有效 默认不选中值为"N",长期有效时为"Y
-    private String contro_name;//控制人姓名
-    private String contro_id_type;//控制人证件类型
-    private String contro_id_no;//控制人证件号
-    private String contro_id_expire;//控制人证件号有效期
-    private String contro_id_expire_long;//是否长期有效
+    private String merchant_id_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
     private String settle_id_no;//结算人身份证号
     private String settle_id_expire;//结算人身份证号有效期
-    private String settle_id_expire_long;//是否长期有效 默认不选中值为"N",长期有效时为"Y
+    private String settle_id_expire_long = "N";//是否长期有效 默认不选中值为"N",长期有效时为"Y
     private String account_name;//结算人账户开户名  "1",
     private String account_no;//结算人账户开户号 "1",
     private String account_phone;//银行预留手机号  "13253658958",
@@ -73,21 +62,14 @@ public class BusDetailData implements Serializable{
     private String bank_addres_pro_no;//结算账户开户省sid
     private String bank_addres_city_no;//结算账户开户城市sid
     private String bank_no;// 开户支行bank_no  "103139487204",
-    private String orgcod;// 组织机构代码号 "45757"
-    private String taxcod;// 税务登记号 "103139487204",
 
     /** 第二页信息回显字段 */
-    private String merchant_id_type_name;//法人证件类型名称,
-    private String contro_id_type_name;//实际控制人证件类型名称,
     private String bank_zname;//"中国建设银行",
     private String bank_addres_pro_name;// "天津市              ",
     private String bank_addres_city_name;// "天津市",
     private String bank_name;// "中国建设银行股份有限公司天津西青开发区支行",
 
 
-    /** 第三页微信，支付宝开关 */
-    private String wx_open;//"Y"
-    private String ali_open;//"Y"
 
     /** 第三页资质费率信息 */
     private String wx_rate;//微信费率
@@ -114,8 +96,6 @@ public class BusDetailData implements Serializable{
     private String img_mer_increment;//商户增值协议证明
     private String img_tax_reg;//税务登记证
     private String img_org_code;//机构代码证"https://dev.weupay.com/image/agent/11/350/201810250unqh8i71v.jpg",
-    private String img_person_a;//联系人证件图片正面
-    private String img_person_b;//联系人证件图片反面
     //缩略图
     private String thum_img_business_license;//营业执照
     private String thum_img_idcard_a;//法人正面"https://dev.weupay.com/image/agent/11/318/thum_201810237p5n3gsb21.jpg@null",
@@ -132,8 +112,6 @@ public class BusDetailData implements Serializable{
     private String thum_img_mer_increment;//商户增值协议证明
     private String thum_img_tax_reg;//税务登记证
     private String thum_img_org_code;//机构代码证"https://dev.weupay.com/image/agent/11/350/201810250unqh8i71v.jpg",
-    private String thum_img_person_a;//联系人证件图片正面
-    private String thum_img_person_b;//联系人证件图片反面
 
     private String reserve1;//借记卡封底值 "23",
 
@@ -919,174 +897,5 @@ public class BusDetailData implements Serializable{
 
     public void setError_msg(String error_msg) {
         this.error_msg = error_msg;
-    }
-
-    public String getMerchant_type() {
-        return merchant_type;
-    }
-
-    public void setMerchant_type(String merchant_type) {
-        this.merchant_type = merchant_type;
-    }
-
-
-    public String getMerchant_id_type() {
-        return merchant_id_type;
-    }
-
-    public void setMerchant_id_type(String merchant_id_type) {
-        this.merchant_id_type = merchant_id_type;
-    }
-
-    public String getOrgcod() {
-        return orgcod;
-    }
-
-    public void setOrgcod(String orgcod) {
-        this.orgcod = orgcod;
-    }
-
-    public String getTaxcod() {
-        return taxcod;
-    }
-
-    public void setTaxcod(String taxcod) {
-        this.taxcod = taxcod;
-    }
-
-    public String getMerchant_id_type_name() {
-        return merchant_id_type_name;
-    }
-
-    public void setMerchant_id_type_name(String merchant_id_type_name) {
-        this.merchant_id_type_name = merchant_id_type_name;
-    }
-
-    public String getWx_open() {
-        return wx_open;
-    }
-
-    public void setWx_open(String wx_open) {
-        this.wx_open = wx_open;
-    }
-
-    public String getAli_open() {
-        return ali_open;
-    }
-
-    public void setAli_open(String ali_open) {
-        this.ali_open = ali_open;
-    }
-
-    public String getPerson_id_no() {
-        return person_id_no;
-    }
-
-    public void setPerson_id_no(String person_id_no) {
-        this.person_id_no = person_id_no;
-    }
-
-    public String getImg_person_a() {
-        return img_person_a;
-    }
-
-    public void setImg_person_a(String img_person_a) {
-        this.img_person_a = img_person_a;
-    }
-
-    public String getImg_person_b() {
-        return img_person_b;
-    }
-
-    public void setImg_person_b(String img_person_b) {
-        this.img_person_b = img_person_b;
-    }
-
-    public String getThum_img_person_a() {
-        return thum_img_person_a;
-    }
-
-    public void setThum_img_person_a(String thum_img_person_a) {
-        this.thum_img_person_a = thum_img_person_a;
-    }
-
-    public String getThum_img_person_b() {
-        return thum_img_person_b;
-    }
-
-    public void setThum_img_person_b(String thum_img_person_b) {
-        this.thum_img_person_b = thum_img_person_b;
-    }
-
-    public String getPerson_id_expire() {
-        return person_id_expire;
-    }
-
-    public void setPerson_id_expire(String person_id_expire) {
-        this.person_id_expire = person_id_expire;
-    }
-
-    public String getPerson_id_expire_long() {
-        return person_id_expire_long;
-    }
-
-    public void setPerson_id_expire_long(String person_id_expire_long) {
-        this.person_id_expire_long = person_id_expire_long;
-    }
-
-    public String getLegal_phone() {
-        return legal_phone;
-    }
-
-    public void setLegal_phone(String legal_phone) {
-        this.legal_phone = legal_phone;
-    }
-
-    public String getContro_name() {
-        return contro_name;
-    }
-
-    public void setContro_name(String contro_name) {
-        this.contro_name = contro_name;
-    }
-
-    public String getContro_id_type() {
-        return contro_id_type;
-    }
-
-    public void setContro_id_type(String contro_id_type) {
-        this.contro_id_type = contro_id_type;
-    }
-
-    public String getContro_id_no() {
-        return contro_id_no;
-    }
-
-    public void setContro_id_no(String contro_id_no) {
-        this.contro_id_no = contro_id_no;
-    }
-
-    public String getContro_id_expire() {
-        return contro_id_expire;
-    }
-
-    public void setContro_id_expire(String contro_id_expire) {
-        this.contro_id_expire = contro_id_expire;
-    }
-
-    public String getContro_id_expire_long() {
-        return contro_id_expire_long;
-    }
-
-    public void setContro_id_expire_long(String contro_id_expire_long) {
-        this.contro_id_expire_long = contro_id_expire_long;
-    }
-
-    public String getContro_id_type_name() {
-        return contro_id_type_name;
-    }
-
-    public void setContro_id_type_name(String contro_id_type_name) {
-        this.contro_id_type_name = contro_id_type_name;
     }
 }

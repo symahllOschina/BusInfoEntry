@@ -12,8 +12,6 @@ import android.view.WindowManager;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.*;
-
 /**
  * 常用工具类方法总结
  * dip2px：根据手机分辨率把dp转换成px(像素)
@@ -53,7 +51,7 @@ public class Utils {
 	 * 判断String是否为null,"",是返回为true
 	 */
 	public static boolean isEmpty(String s) {
-		return s == null || s.length() == 0 || "".equals(s.trim()) || s.trim().equals("null");
+		return s == null || s.length() == 0 || s.trim().equals("") || s.trim().equals("null");
 	}
 
 	/**
@@ -75,11 +73,11 @@ public class Utils {
 	
 	public static boolean isMobileNO(String mobiles){
 		//注意此种方式仅支持以上号段，如177电信号也会表示不匹配
-		Pattern p = compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
+		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");  
 		//这里代表电话号码必须以14、13、15、18、17开头的11位数，可以根据自己的需求进行修改
-		Pattern p1 = compile("^((14[0-9])|(13[0-9])|(15[0-9])|(18[0-9])|(17[0-9]))\\d{8}$");
+		Pattern p1 = Pattern.compile("^((14[0-9])|(13[0-9])|(15[0-9])|(18[0-9])|(17[0-9]))\\d{8}$");
 		//
-		Pattern p2 = compile("^(13[0-9]|14[57]|15[0-35-9]|17[6-8]|18[0-9])[0-9]{8}$");
+		Pattern p2 = Pattern.compile("^(13[0-9]|14[57]|15[0-35-9]|17[6-8]|18[0-9])[0-9]{8}$");
 		Matcher m = p1.matcher(mobiles);  
 		return m.matches();
 	}
@@ -87,7 +85,7 @@ public class Utils {
 	 * 同时验证手机号和固话
 	 */
 	public static boolean isPhoneNumAndTel(String mobiles){
-		Pattern p = compile("^((14[0-9])|(13[0-9])|(15[0-9])|(18[0-9])|(17[0-9]))\\d{8}$|^0\\d{2,3}-?\\d{7,8}$|^4\\d{2,3}-?\\d{7,8}$");
+		Pattern p = Pattern.compile("^((14[0-9])|(13[0-9])|(15[0-9])|(18[0-9])|(17[0-9]))\\d{8}$|^0\\d{2,3}-?\\d{7,8}$|^4\\d{2,3}-?\\d{7,8}$");
 		Matcher m = p.matcher(mobiles);
 		return m.matches();
 	}
@@ -98,18 +96,16 @@ public class Utils {
 	 */
 	public static boolean isZipNO(String zipString){
 	      String str = "^[1-9][0-9]{5}$";
-	      return compile(str).matcher(zipString).matches();
+	      return Pattern.compile(str).matcher(zipString).matches();
 	}
 	
 	/**
 	 * 判断邮箱格式是否正确
 	 */
 	 public static boolean isEmail(String email){
-		 if (null==email || "".equals(email)) {
-			 return false;
-		 }
+		 if (null==email || "".equals(email)) return false;	
 		 //Pattern p = Pattern.compile("\\w+@(\\w+.)+[a-z]{2,3}"); //简单匹配  
-		 Pattern p =  compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");//复杂匹配
+		 Pattern p =  Pattern.compile("\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*");//复杂匹配  
 		 Matcher m = p.matcher(email);  
 		 return m.matches();  
 	 }
@@ -119,16 +115,14 @@ public class Utils {
 	  *  这里设置的是连续1秒内不能重复点击该按钮
 	  */
 	private static long lastClickTime;
-    public synchronized static boolean isFastClick(int num) {
+    public synchronized static boolean isFastClick() {
         long time = System.currentTimeMillis();   
-        if ( time - lastClickTime < num) {
+        if ( time - lastClickTime < 1000) {
             return true;   
         }   
         lastClickTime = time;   
         return false;   
     }
-
-
 
     
     /**  
@@ -205,11 +199,9 @@ public class Utils {
 	 *
 	 */
 	public static boolean isLicenseNum(String licenseNum){
-		if (null==licenseNum || "".equals(licenseNum)){
+		if (null==licenseNum || "".equals(licenseNum))
 			return false;
-		}
-
-		Pattern p =  compile("(^(?:(?![IOZSV])[\\dA-Z]){2}\\d{6}(?:(?![IOZSV])[\\dA-Z]){10}$)|(^\\d{15}$)");
+		Pattern p =  Pattern.compile("(^(?:(?![IOZSV])[\\dA-Z]){2}\\d{6}(?:(?![IOZSV])[\\dA-Z]){10}$)|(^\\d{15}$)");
 		Matcher m = p.matcher(licenseNum);
 		Log.e("证件照：",m.matches()+"");
 		return m.matches();

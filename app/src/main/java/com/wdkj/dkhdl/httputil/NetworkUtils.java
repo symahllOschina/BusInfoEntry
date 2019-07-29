@@ -16,24 +16,12 @@ import java.io.IOException;
 
 public class NetworkUtils {
 
-    /**
-     * 网络是否连接
-     */
     public static boolean isAvailable(Context mContext) {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isAvailable());
     }
 
-
-    /**
-     * 接口请求成功返回code
-     */
-    public static final String RESULT_CODE = "000000";
-    /**
-     * 接口请求成功业务逻辑成功返回subCode;
-     */
-    public static final String RESULT_SUBCODE = "000000";
 
     public static final int REQUEST_JSON_CODE = 201;
     public static final String REQUEST_JSON_TEXT = "参数配置异常！";

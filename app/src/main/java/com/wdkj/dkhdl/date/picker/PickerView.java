@@ -80,9 +80,7 @@ public class PickerView extends View {
                 }
             } else
                 // 这里mMoveLen / Math.abs(mMoveLen)是为了保有mMoveLen的正负号，以实现上滚或下滚
-            {
                 mMoveLen = mMoveLen - mMoveLen / Math.abs(mMoveLen) * SPEED;
-            }
             invalidate();
         }
 
@@ -106,9 +104,8 @@ public class PickerView extends View {
     }
 
     private void performSelect() {
-        if (mSelectListener != null) {
+        if (mSelectListener != null)
             mSelectListener.onSelect(mDataList.get(mCurrentSelected));
-        }
     }
 
     public void setData(List<String> datas) {
@@ -126,17 +123,16 @@ public class PickerView extends View {
         mCurrentSelected = selected;
         if (loop) {
             int distance = mDataList.size() / 2 - mCurrentSelected;
-            if (distance < 0) {
+            if (distance < 0)
                 for (int i = 0; i < -distance; i++) {
                     moveHeadToTail();
                     mCurrentSelected--;
                 }
-            } else if (distance > 0) {
+            else if (distance > 0)
                 for (int i = 0; i < distance; i++) {
                     moveTailToHead();
                     mCurrentSelected++;
                 }
-            }
         }
         invalidate();
     }
@@ -147,12 +143,11 @@ public class PickerView extends View {
      * @param mSelectItem
      */
     public void setSelected(String mSelectItem) {
-        for (int i = 0; i < mDataList.size(); i++) {
+        for (int i = 0; i < mDataList.size(); i++)
             if (mDataList.get(i).equals(mSelectItem)) {
                 setSelected(i);
                 break;
             }
-        }
     }
 
 
@@ -204,9 +199,8 @@ public class PickerView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // 根据index绘制view
-        if (isInit) {
+        if (isInit)
             drawData(canvas);
-        }
     }
 
     private void drawData(Canvas canvas) {
@@ -279,9 +273,7 @@ public class PickerView extends View {
                         invalidate();
                         return true;
                     }
-                    if (!loop) {
-                        mCurrentSelected--;
-                    }
+                    if (!loop) mCurrentSelected--;
                     // 往下滑超过离开距离
                     moveTailToHead();
                     mMoveLen = mMoveLen - MARGIN_ALPHA * mMinTextSize;
@@ -291,9 +283,7 @@ public class PickerView extends View {
                         invalidate();
                         return true;
                     }
-                    if (!loop) {
-                        mCurrentSelected++;
-                    }
+                    if (!loop) mCurrentSelected++;
                     // 往上滑超过离开距离
                     moveHeadToTail();
                     mMoveLen = mMoveLen + MARGIN_ALPHA * mMinTextSize;
@@ -304,9 +294,6 @@ public class PickerView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 doUp(event);
-                break;
-            default:
-
                 break;
         }
         return true;
@@ -376,11 +363,10 @@ public class PickerView extends View {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        if (canScroll) {
+        if (canScroll)
             return super.dispatchTouchEvent(event);
-        } else {
+        else
             return false;
-        }
     }
 
     /**

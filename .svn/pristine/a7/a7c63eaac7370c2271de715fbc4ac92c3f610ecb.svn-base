@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
     <include
         layout="@layout/main_toolbar_layout">
     </include>
@@ -56,6 +56,31 @@
                     style="@style/info_text_etText"
                     android:hint="商户名称"
                     android:maxLength="30"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:orientation="horizontal"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                >
+                <TextView
+                    style="@style/info_text_xinghao"
+                    android:text="*"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    style="@style/info_text_title"
+                    android:text="商户类型："
+                    android:layout_gravity="center_vertical"
+                    />
+                <org.angmarch.views.NiceSpinner
+                    android:id="@+id/basic_info_merchant_type"
+                    style="@style/info_text_etText"
+                    app:arrowTint="@color/grey_666666"
+                    app:textTint="@color/grey_666666"
                     />
             </LinearLayout>
             <LinearLayout
@@ -198,6 +223,66 @@
                     />
                 <TextView
                     style="@style/info_text_title"
+                    android:text="联系人身份证号："
+                    android:ems="4"
+                    android:layout_gravity="center_vertical"
+                    />
+                <EditText
+                    android:id="@+id/basic_info_contactsIdCard"
+                    style="@style/info_text_etText"
+                    android:hint="联系人身份证号"
+                    android:inputType="numberDecimal"
+                    android:digits="0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:orientation="horizontal"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                >
+                <TextView
+                    style="@style/info_text_xinghao"
+                    android:text="*"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    style="@style/info_text_title"
+                    android:text="身份证有效期："
+                    android:ems="4"
+                    android:layout_gravity="center_vertical"
+                    />
+                <Button
+                    android:id="@+id/basic_info_contacts_tvIdCardValidity"
+                    style="@style/info_text_etText"
+                    android:drawableRight="@drawable/spinner_icon_xiao"
+                    android:gravity="center_vertical"
+                    />
+                <CheckBox
+                    android:id="@+id/basic_info_contacts_cbIdCardValidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="长期有效"
+                    android:paddingRight="10dp"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:orientation="horizontal"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                >
+                <TextView
+                    style="@style/info_text_xinghao"
+                    android:text="*"
+                    android:layout_marginRight="5dp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    style="@style/info_text_title"
                     android:text="联系人电话："
                     android:ems="4"
                     android:layout_gravity="center_vertical"
@@ -270,7 +355,7 @@
                 >
                 <TextView
                     style="@style/info_text_xinghao"
-                    android:text=" "
+                    android:text="*"
                     android:layout_marginRight="5dp"
                     android:layout_gravity="center_vertical"
                     />
@@ -285,7 +370,6 @@
                     android:inputType="phone"
                     />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
     <Button

@@ -28,9 +28,6 @@ public class XmlUtils {
                         info.setDescription(parser.nextText()); //获取该文件的信息
                     }
                     break;
-                default:
-
-                    break;
             }
             type = parser.next();
         }

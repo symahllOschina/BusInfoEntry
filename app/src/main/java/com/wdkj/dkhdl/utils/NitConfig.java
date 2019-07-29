@@ -12,16 +12,15 @@ public class NitConfig {
 	/**  打包前必看：
 	 * 1，替换正式域名前缀(包括更新版本地址前缀)
 	 */
-	public static final boolean isFormal = false;//true:正式环境,false:测试环境
+	public static final boolean isFormal = true;//true:正式环境,false:测试环境
 
 
 	//测试服务器地址前缀
-	public static final String queryBasePath =  "https://dev.weupay.com/admin";
-	public static final String queryBasePath1 =  "http://192.168.1.143:8081/admin";
+	public static final String queryBasePath1 =  "https://dev.weupay.com/admin";
 
 
 	//正式服务器地址前缀
-	public static final String queryBasePath2 = "https://weixin.weupay.com/admin";
+	public static final String queryBasePath = "https://weixin.weupay.com/admin";
 
 
 	/**
@@ -73,11 +72,6 @@ public class NitConfig {
 	 */
 	public static final String subBusInfo = queryBasePath + "/wp/ag/addAppAgentMerone";
 
-	/**
-	 * 第二页获取证件类型
-	 */
-	public static final String getMerchantIdTypeList = queryBasePath + "/wp/ag/appLegalDocumentType";
-
 	/***
 	 * 银行总行
 	 * http://dev.weupay.com/admin/wp/comm/selectBank
@@ -91,9 +85,8 @@ public class NitConfig {
 	 * bank_city_code：城市code,
 	 * id :总行id
      * bank_name:支行名称（模糊查询）
-	 * http://dev.weupay.com/admin/wp/comm/selectbranchByProCit
 	 */
-	public static final String getBranchList = queryBasePath + "/wp/comm/selectbranchByProCit";
+	public static final String getBranchList = queryBasePath + "/wp/comm/selectbranch";
 
 	/**
 	 *商户结算信息提交

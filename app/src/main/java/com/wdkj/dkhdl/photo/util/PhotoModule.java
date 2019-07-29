@@ -165,7 +165,7 @@ public class PhotoModule {
         imageUri = data.getData();
         if(DocumentsContract.isDocumentUri(context,imageUri)){
             String docId = DocumentsContract.getDocumentId(imageUri);
-            if("com.android.providers.media.documents".equals(imageUri.getAuthority())){
+            if(imageUri.getAuthority().equals("com.android.providers.media.documents")){
                 String id = docId.split(":")[1];
                 String selection = MediaStore.Images.Media._ID + "=" + id;
                 imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);

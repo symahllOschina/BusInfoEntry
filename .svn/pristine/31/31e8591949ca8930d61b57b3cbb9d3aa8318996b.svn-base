@@ -16,6 +16,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.wdkj.dkhdl.BaseActivity;
+import com.wdkj.dkhdl.Constant;
 import com.wdkj.dkhdl.MainActivity;
 import com.wdkj.dkhdl.R;
 import com.wdkj.dkhdl.adapter.IndustryTypeAdapter;
@@ -33,14 +36,19 @@ import com.wdkj.dkhdl.bean.BusDetailData;
 import com.wdkj.dkhdl.bean.IndustryTypeData;
 import com.wdkj.dkhdl.bean.RegionData;
 import com.wdkj.dkhdl.bean.UserBean;
+import com.wdkj.dkhdl.date.picker.TimeSelector;
+import com.wdkj.dkhdl.date.util.DateTimeUtil;
+import com.wdkj.dkhdl.date.util.DateToTimeStamp;
 import com.wdkj.dkhdl.httputil.HttpURLConnectionUtil;
 import com.wdkj.dkhdl.httputil.NetworkUtils;
 import com.wdkj.dkhdl.utils.EditTextUtils;
 import com.wdkj.dkhdl.utils.GsonUtils;
+import com.wdkj.dkhdl.utils.IdcardUtils;
 import com.wdkj.dkhdl.utils.NitConfig;
 import com.wdkj.dkhdl.utils.ToastUtil;
 import com.wdkj.dkhdl.utils.Utils;
 
+import org.angmarch.views.NiceSpinner;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xutils.view.annotation.ContentView;
@@ -54,7 +62,9 @@ import java.util.List;
  * 商户基本信息
  */
 @ContentView(R.layout.activity_basic_info)
-public class BasicInfoActivity extends BaseActivity implements View.OnClickListener{
+public class BasicInfoActivity extends BaseActivity implements View.OnClickListener,
+                                                                CompoundButton.OnCheckedChangeListener
+{
     public static Context context;
     @ViewInject(R.id.info_failure_hintText)
     TextView tvErrorMsg;
@@ -70,6 +80,12 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
     EditText etAddress;
     @ViewInject(R.id.basic_info_contacts)
     EditText etContacts;
+    @ViewInject(R.id.basic_info_contactsIdCard)
+    EditText etContactsIdCard;
+    @ViewInject(R.id.basic_info_contacts_tvIdCardValidity)
+    Button tvIdCardValidity;//联系人身份证号有效期
+    @ViewInject(R.id.basic_info_contacts_cbIdCardValidity)
+    CheckBox cbIdCardValidity;//是否长期有效
     @ViewInject(R.id.basic_info_contactsTel)
     EditText etContactsTel;
     @ViewInject(R.id.basic_info_contactsEmil)
@@ -78,6 +94,8 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
     TextView tvIndustryType;
     @ViewInject(R.id.basic_info_service_phone)
     EditText etServicePhone;
+    @ViewInject(R.id.basic_info_merchant_type)
+    NiceSpinner tvMerchantType;
 
     @ViewInject(R.id.basic_info_btNext)
     Button btNext;
@@ -116,21 +134,42 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
     private Dialog oneIndustryDialog;
     private Dialog twoIndustryDialog;
     private Dialog threeIndustryDialog;
+    /**
+     * 商户类型："1" 一级商户 "2" 二级商户
+     * 默认为二级商户
+     */
+    private String merchantType = "2";
+
+    private String cb_IdCardValidity = "N";//联系人身份证有效日期，默认不选中值为"N",长期有效时为"Y"
+
+    private static final String format = "yyyy-MM-dd HH:mm";
+    private String pickerStartDateTime,pickerEndDateTime;//日期选择控件的选择范围，起始日期和结束日期
+
 
     private UserBean userBean = MainActivity.userBean;
 
     private int REQUEST_CODE = 1;
 
+    BusDetailData bus = null;//商户信息对象
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = BasicInfoActivity.this;
         Intent in = getIntent();
         int busId = in.getIntExtra("id",0);
+        //设置日期起始时间和结束日期
+        //初始化起始日期时间（三月后日期）
+        pickerStartDateTime = DateTimeUtil.getAMonthDateStr(3,format);
+        pickerEndDateTime = DateTimeUtil.getYearDateStr(20,format);
+        Log.e("起始日期：",pickerStartDateTime);
+        Log.e("结束日期：",pickerEndDateTime);
+
         initView();
         initListener();
 
         setTitle("商户基本资料");
+
+
 
         //获取商户基础信息
         if(busId!=0){
@@ -152,10 +191,43 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
         EditTextUtils.setEditTextInputSpace(etContactsTel);
         EditTextUtils.setEditTextInputSpace(etContactsEmil);
         EditTextUtils.setEditTextInputSpace(etServicePhone);
+
+        //商户类型
+        BusDetailData bus = null;
+        setMerchantType(bus);
+        /**
+         * 联系人证件号及有效期
+         */
+        //证件到期日期（默认显示为系统日期）
+        if(bus!=null){
+            String person_id_expireStr = bus.getPerson_id_expire();
+            if(Utils.isNotEmpty(person_id_expireStr)){
+                Long person_id_expireLong = Long.parseLong(person_id_expireStr);
+                String person_id_expire = DateTimeUtil.stampToFormatDate(person_id_expireLong,"yyyy-MM-dd");
+                tvIdCardValidity.setText(person_id_expire);
+            }else{
+                tvIdCardValidity.setText(pickerStartDateTime.split(" ")[0]);
+            }
+        }else{
+            tvIdCardValidity.setText(pickerStartDateTime.split(" ")[0]);
+        }
+        //是否长期有效
+        if(bus!=null){
+            if(Utils.isNotEmpty(bus.getPerson_id_expire_long())){
+                cb_IdCardValidity = bus.getPerson_id_expire_long();
+            }
+        }
+        if("N".equals(cb_IdCardValidity)){
+            cbIdCardValidity.setChecked(false);
+        }else{
+            cbIdCardValidity.setChecked(true);
+        }
     }
 
     private void initListener(){
         tvRegion.setOnClickListener(this);
+        tvIdCardValidity.setOnClickListener(this);
+        cbIdCardValidity.setOnCheckedChangeListener(this);
         tvIndustryType.setOnClickListener(this);
         btNext.setOnClickListener(this);
     }
@@ -167,49 +239,135 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
     private void updateView(BusDetailData bus){
         //merchant_status状态为2即审核驳回时返回驳回原因
         if(bus!=null){
-            if(bus.getMerchant_status().equals("2")){
+            if("2".equals(bus.getMerchant_status())){
                 if(Utils.isNotEmpty(bus.getError_msg())){
                     tvErrorMsg.setVisibility(View.VISIBLE);
                     tvErrorMsg.setText(String.format(getResources().getString(R.string.failure_hints),bus.getError_msg()));
                 }
             }
+
+            //商户名称禁止修改
+//            etBusName.setEnabled(false);
+            etBusName.setText(bus.getMerchant_name());
+            etBusAbbreviation.setText(bus.getMerchant_alias());
+            etRegistName.setText(bus.getMerchant_company());
+            //省
+            province = new RegionData();
+            province.setSid(Integer.parseInt(bus.getMerchant_province_code()));
+            province.setFullname(bus.getMerchant_province_name());
+            //市
+            city = new RegionData();
+            city.setSid(Integer.parseInt(bus.getMerchant_city_code()));
+            city.setFullname(bus.getMerchant_city_name());
+            //县区
+            area = new RegionData();
+            area.setSid(Integer.parseInt(bus.getMerchant_county_code()));
+            area.setFullname(bus.getMerchant_county_name());
+            tvRegion.setText(province.getFullname()+"/"+city.getFullname()+"/"+area.getFullname());
+            etAddress.setText(bus.getMerchant_address());
+            //联系人信息
+            etContacts.setText(bus.getMerchant_person());
+            etContactsIdCard.setText(bus.getPerson_id_no());
+            String person_id_expireStr = bus.getPerson_id_expire();
+            if(Utils.isNotEmpty(person_id_expireStr)){
+                Long person_id_expireLong = Long.parseLong(person_id_expireStr);
+                String person_id_expire = DateTimeUtil.stampToFormatDate(person_id_expireLong,"yyyy-MM-dd");
+                tvIdCardValidity.setText(person_id_expire);
+            }else{
+                tvIdCardValidity.setText(pickerStartDateTime.split(" ")[0]);
+            }
+            //是否长期有效
+            if(Utils.isNotEmpty(bus.getPerson_id_expire_long())){
+                cb_IdCardValidity = bus.getPerson_id_expire_long();
+            }
+            if("N".equals(cb_IdCardValidity)){
+                cbIdCardValidity.setChecked(false);
+            }else{
+                cbIdCardValidity.setChecked(true);
+            }
+            etContactsTel.setText(bus.getMerchant_phone());
+            etContactsEmil.setText(bus.getMerchant_email());
+            //行业类目
+            oneIndustryType = new IndustryTypeData();
+            oneIndustryType.setId(Integer.parseInt(bus.getBusiness_type1_code()));
+            oneIndustryType.setName(bus.getBusiness_type1_name());
+            twoIndustryType = new IndustryTypeData();
+            twoIndustryType.setId(Integer.parseInt(bus.getBusiness_type2_code()));
+            twoIndustryType.setName(bus.getBusiness_type2_name());
+            threeIndustryType = new IndustryTypeData();
+            threeIndustryType.setId(Integer.parseInt(bus.getBusiness_type3_code()));
+            threeIndustryType.setName(bus.getBusiness_type3_name());
+            tvIndustryType.setText(oneIndustryType.getName()+"/"+twoIndustryType.getName()+"/"+threeIndustryType.getName());
+            //客服电话
+            etServicePhone.setText(bus.getMerchant_service_phone());
+            //商户类型
+            setMerchantType(bus);
+
         }
-        //商户名称禁止修改
-        etBusName.setEnabled(false);
-        etBusName.setText(bus.getMerchant_name());
-        etBusAbbreviation.setText(bus.getMerchant_alias());
-        etRegistName.setText(bus.getMerchant_company());
-        //省
-        province = new RegionData();
-        province.setSid(Integer.parseInt(bus.getMerchant_province_code()));
-        province.setFullname(bus.getMerchant_province_name());
-        //市
-        city = new RegionData();
-        city.setSid(Integer.parseInt(bus.getMerchant_city_code()));
-        city.setFullname(bus.getMerchant_city_name());
-        //县区
-        area = new RegionData();
-        area.setSid(Integer.parseInt(bus.getMerchant_county_code()));
-        area.setFullname(bus.getMerchant_county_name());
-        tvRegion.setText(province.getFullname()+"/"+city.getFullname()+"/"+area.getFullname());
-        etAddress.setText(bus.getMerchant_address());
-        etContacts.setText(bus.getMerchant_person());
-        etContactsTel.setText(bus.getMerchant_phone());
-        etContactsEmil.setText(bus.getMerchant_email());
-        //行业类目
-        oneIndustryType = new IndustryTypeData();
-        oneIndustryType.setId(Integer.parseInt(bus.getBusiness_type1_code()));
-        oneIndustryType.setName(bus.getBusiness_type1_name());
-        twoIndustryType = new IndustryTypeData();
-        twoIndustryType.setId(Integer.parseInt(bus.getBusiness_type2_code()));
-        twoIndustryType.setName(bus.getBusiness_type2_name());
-        threeIndustryType = new IndustryTypeData();
-        threeIndustryType.setId(Integer.parseInt(bus.getBusiness_type3_code()));
-        threeIndustryType.setName(bus.getBusiness_type3_name());
-        tvIndustryType.setText(oneIndustryType.getName()+"/"+twoIndustryType.getName()+"/"+threeIndustryType.getName());
-        etServicePhone.setText(bus.getMerchant_service_phone());
+
 
     }
+
+    /**
+     * 商户类型
+     */
+    private void setMerchantType(BusDetailData bus){
+        final List<String> list = new ArrayList<>();
+        list.add(Constant.merchantTypeList[0]);
+        list.add(Constant.merchantTypeList[1]);
+        tvMerchantType.attachDataSource(list);
+        if(bus!=null&&Utils.isNotEmpty(bus.getMerchant_type())){
+
+            merchantType = bus.getMerchant_type();
+            tvMerchantType.setSelectedIndex(Constant.getMerchantTypeIndex(merchantType));
+
+
+
+        }else{
+            //默认值为二级商户
+            merchantType = Constant.getMerchantType(list.get(1));
+        }
+
+
+        tvMerchantType.addOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        merchantType = Constant.getMerchantType(list.get(position));
+                        break;
+                    case 1:
+                        merchantType = Constant.getMerchantType(list.get(position));
+                        break;
+                        default:
+                            break;
+                }
+
+            }
+        });
+
+    }
+
+    /**
+     * 选择联系人证件有效期
+     */
+    private void setIdCardValidity(){
+        TimeSelector timeSelector = new TimeSelector(this, new TimeSelector.ResultHandler() {
+            @Override
+            public void handle(String time) {
+//                        Toast.makeText(getApplicationContext(), time, Toast.LENGTH_LONG).show();
+
+                tvIdCardValidity.setText(time.split(" ")[0]);
+
+
+            }
+        },pickerStartDateTime,pickerEndDateTime);
+        timeSelector.setMode(TimeSelector.MODE.YMD);//显示 年月日时分（默认）；
+//                timeSelector.setMode(TimeSelector.MODE.YMD);//只显示 年月日
+        timeSelector.setIsLoop(false);//不设置时为true，即循环显示
+        timeSelector.show();
+    }
+
 
 
 
@@ -245,6 +403,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,lsProvince.get(position).getFullname(),1);
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 provinceIndex = position;
                 provinceName = list.get(position).getFullname();
                 rbProvince.setText(provinceName);
@@ -292,6 +453,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,list.get(position).getFullname(),1);
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 cityIndex = position;
                 cityName = list.get(position).getFullname();
                 rbCity.setText(cityName);
@@ -344,7 +508,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,list.get(position).getFullname(),1);
-
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 areaIndex = position;
                 areaName = list.get(position).getFullname();
 
@@ -395,6 +561,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,list.get(position).getName(),1);
 
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 oneIndustryIndex = position;
                 oneIndustryName = list.get(position).getName();
                 rbProvince.setText(oneIndustryName);
@@ -442,6 +611,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,list.get(position).getName(),1);
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 twoIndustryIndex = position;
                 twoIndustryName = list.get(position).getName();
                 rbCity.setText(twoIndustryName);
@@ -494,7 +666,9 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showText(context,list.get(position).getName(),1);
-
+                if(Utils.isFastClick(Constant.INTERVAL500)){
+                    return;
+                }
                 threeIndustryIndex = position;
                 threeIndustryName = list.get(position).getName();
 
@@ -649,13 +823,15 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
      */
     private void getIndustryType(){
         showWaitDialog();
-        final String url = NitConfig.getIndustryType;
+        final String url = NitConfig.getSubIndustryType;
         new Thread(){
             @Override
             public void run() {
                 try {
                     // 拼装JSON数据，向服务端发起请求
                     JSONObject userJSON = new JSONObject();
+                    userJSON.put("id","0");
+                    userJSON.put("type","");
                     String content = String.valueOf(userJSON);
                     Log.e("查询行业一级分类请求参数：", content);
                     String jsonStr = HttpURLConnectionUtil.doPos(url,content);
@@ -691,6 +867,7 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                     // 拼装JSON数据，向服务端发起请求
                     JSONObject userJSON = new JSONObject();
                     userJSON.put("id", String.valueOf(id));
+                    userJSON.put("type","");
                     String content = String.valueOf(userJSON);
                     Log.e("查询行业二级分类请求参数：", content);
                     String jsonStr = HttpURLConnectionUtil.doPos(url,content);
@@ -714,7 +891,7 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
     }
 
     /**
-     * 获取行业分类二级菜单
+     * 获取行业分类三级菜单
      */
     private void getThreeIndustryType(final int id){
         showWaitDialog();
@@ -726,6 +903,7 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                     // 拼装JSON数据，向服务端发起请求
                     JSONObject userJSON = new JSONObject();
                     userJSON.put("id", String.valueOf(id));
+                    userJSON.put("type","");
                     String content = String.valueOf(userJSON);
                     Log.e("查询行业三级分类请求参数：", content);
                     String jsonStr = HttpURLConnectionUtil.doPos(url,content);
@@ -752,10 +930,16 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
      * 提交第一页商户基本信息
      */
     private void subBusInfo(final String busNameStr, final String busAbbreviationStr, final String registNameStr, final String addressStr,
-                            final String contactsStr, final String contactsTelStr, final String contactsEmilStr, final String servicePhoneStr)
+                            final String contactsStr, final String contactsIdCardStr,final String contactsTelStr, final String contactsEmilStr, final String servicePhoneStr)
     {
 
         showWaitDialog();
+
+        //联系人证件有效期
+        final String idCardValidity = tvIdCardValidity.getText().toString();
+        //有效期转时间戳
+        final String person_id_expire = DateToTimeStamp.getStartTimeStampTo(idCardValidity);
+
         final String url = NitConfig.subBusInfo;
         new Thread(){
             @Override
@@ -774,12 +958,16 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                     userJSON.put("merchant_county_code", area.getSid());
                     userJSON.put("merchant_address", addressStr);
                     userJSON.put("merchant_person", contactsStr);
+                    userJSON.put("person_id_no", contactsIdCardStr);
+                    userJSON.put("person_id_expire", person_id_expire);
+                    userJSON.put("person_id_expire_long", cb_IdCardValidity);
                     userJSON.put("merchant_phone", contactsTelStr);
                     userJSON.put("merchant_email", contactsEmilStr);
                     userJSON.put("business_type1_id", oneIndustryType.getId());
                     userJSON.put("business_type2_id", twoIndustryType.getId());
                     userJSON.put("business_type3_id", threeIndustryType.getId());
                     userJSON.put("merchant_service_phone", servicePhoneStr);
+                    userJSON.put("merchant_type", merchantType);
                     String content = String.valueOf(userJSON);
                     Log.e("提交第一页请求参数：", content);
                     String jsonStr = HttpURLConnectionUtil.doPos(url,content);
@@ -877,6 +1065,8 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                     ToastUtil.showText(context,errorJsonText,1);
                     hideWaitDialog();
                     break;
+                default:
+                    break;
             }
         }
     };
@@ -959,7 +1149,7 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             if(status == 200){
                 String dataJson = job.getString("data");
                 JSONObject obj = new JSONObject(dataJson);
-                String oneIndustryList = obj.getString("TypeList");
+                String oneIndustryList = obj.getString("BusinessList");
                 lsOneIndustry.clear();
                 Gson gjson1  =  GsonUtils.getGson();
                 lsOneIndustry=gjson1.fromJson(oneIndustryList, new TypeToken<List<IndustryTypeData>>() {  }.getType());
@@ -1029,28 +1219,40 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
         try {
             JSONObject job = new JSONObject(json);
             String code = job.getString("code");
-            if(code.equals("000000")){
-                String dataJson = job.getString("data");
-                JSONObject dataJob = new JSONObject(dataJson);
-                int status = dataJob.getInt("status");
-                String message = dataJob.getString("message");
-                if(status == 200){
+            String msg = job.getString("msg");
+            if(NetworkUtils.RESULT_CODE.equals(code)){
+                String subCode = job.getString("subCode");
+                String subMsg = job.getString("subMsg");
+                if(NetworkUtils.RESULT_SUBCODE.equals(subCode)){
+                    String dataJson = job.getString("data");
+                    JSONObject dataJob = new JSONObject(dataJson);
                     String busNameStr = etBusName.getText().toString();
                     int id = dataJob.getInt("id");
                     Intent intent = new Intent();
                     intent.putExtra("id",id);
                     intent.putExtra("name",busNameStr);
+                    intent.putExtra("merchantType",merchantType);
                     intent.setClass(this,AccountInfoActivity.class);
                     startActivityForResult(intent,REQUEST_CODE);
-
                 }else{
-                    ToastUtil.showText(context,message,1);
+                    if(Utils.isNotEmpty(subMsg)){
+                        ToastUtil.showText(context,subMsg,1);
+                    }else{
+                        ToastUtil.showText(context,"提交失败！",1);
+                    }
                 }
             }else{
-                ToastUtil.showText(context,"服务异常",1);
+                if(Utils.isNotEmpty(msg)){
+                    ToastUtil.showText(context,msg,1);
+                }else{
+                    ToastUtil.showText(context,"提交失败！",1);
+                }
+
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
+            ToastUtil.showText(context,"提交失败！",1);
         }
     }
     private void busInfo(String json){
@@ -1058,22 +1260,40 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
         try {
             JSONObject job = new JSONObject(json);
             String code = job.getString("code");
-            if(code.equals("000000")){
-                String dataJson = job.getString("data");
-                JSONObject dataJob = new JSONObject(dataJson);
-                //isEmpty："1"值为1表示有数据，为0无数据
-                String isEmpty = dataJob.getString("isEmpty");
-                if(isEmpty.equals("1")){
-                    String agentMap = dataJob.getString("agentMap");
-                    Gson gjson  =  GsonUtils.getGson();
-                    BusDetailData bus = gjson.fromJson(agentMap, BusDetailData.class);
-                    updateView(bus);
+            String msg = job.getString("msg");
+            if(NetworkUtils.RESULT_CODE.equals(code)){
+                String subCode = job.getString("subCode");
+                String subMsg = job.getString("subMsg");
+                if(NetworkUtils.RESULT_SUBCODE.equals(subCode)){
+                    String dataJson = job.getString("data");
+                    JSONObject dataJob = new JSONObject(dataJson);
+                    //isEmpty："1"值为1表示有数据，为0无数据
+                    String isEmpty = dataJob.getString("isEmpty");
+                    if("1".equals(isEmpty)){
+                        String agentMap = dataJob.getString("agentMap");
+                        Gson gjson  =  GsonUtils.getGson();
+                        bus = gjson.fromJson(agentMap, BusDetailData.class);
+                        updateView(bus);
+                    }
+                }else{
+                    if(Utils.isNotEmpty(subMsg)){
+                        showErrorHintDialog(subMsg);
+                    }else{
+                        showErrorHintDialog("获取数据失败");
+                    }
                 }
+
             }else{
-                ToastUtil.showText(context,"数据请求失败！",1);
+                if(Utils.isNotEmpty(msg)){
+                    showErrorHintDialog(msg);
+                }else{
+                    showErrorHintDialog("服务异常");
+                }
+
             }
         } catch (JSONException e) {
             e.printStackTrace();
+            showErrorHintDialog("获取数据失败");
         }
     }
 
@@ -1115,6 +1335,15 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             ToastUtil.showText(context,"请输入正确的商户联系人！",1);
             return;
         }
+        String contactsIdCardStr = etContactsIdCard.getText().toString().trim();
+        if(Utils.isEmpty(contactsIdCardStr)){
+            ToastUtil.showText(context,"联系人身份证号不能为空！",1);
+            return;
+        }
+        if(!IdcardUtils.validateCard(contactsIdCardStr)){
+            ToastUtil.showText(context,"请检查联系人身份证号是否正确！",1);
+            return;
+        }
         String contactsTelStr = etContactsTel.getText().toString();
         if(Utils.isEmpty(contactsTelStr)){
             ToastUtil.showText(context,"联系人电话不能为空！",1);
@@ -1140,6 +1369,10 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             return;
         }
         String servicePhoneStr = etServicePhone.getText().toString();
+        if(Utils.isEmpty(servicePhoneStr)){
+            ToastUtil.showText(context,"客服电话不能为空！",1);
+            return;
+        }
         if(Utils.isNotEmpty(servicePhoneStr)){
             if(!Utils.isPhoneNumAndTel(servicePhoneStr)){
                 ToastUtil.showText(context,"请填写正确的客服电话！",1);
@@ -1150,9 +1383,38 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
 
         Log.e("结果","省="+province.getFullname()+"市="+city.getFullname()+"区="+area.getFullname());
 
-        subBusInfo(busNameStr,busAbbreviationStr,registNameStr,addressStr,contactsStr,contactsTelStr,contactsEmilStr,servicePhoneStr);
+        subBusInfo(busNameStr,busAbbreviationStr,registNameStr,addressStr,contactsStr,contactsIdCardStr,contactsTelStr,contactsEmilStr,servicePhoneStr);
 
     }
+
+    /**
+     *  显示错误提示框
+     **/
+    private void showErrorHintDialog(String msgText){
+        View view = LayoutInflater.from(activity).inflate(R.layout.error_hint_dialog, null);
+        TextView tvHintTitle = (TextView) view.findViewById(R.id.error_hint_dialog_tvHintTitle);
+        TextView tvHintText = (TextView) view.findViewById(R.id.error_hint_dialog_tvHintText);
+        TextView btok = (TextView) view.findViewById(R.id.error_hint_dialog_tvOk);
+        final Dialog myDialog = new Dialog(activity,R.style.dialog);
+        Window dialogWindow = myDialog.getWindow();
+        WindowManager.LayoutParams params = myDialog.getWindow().getAttributes(); // 获取对话框当前的参数值
+        dialogWindow.setAttributes(params);
+        myDialog.setContentView(view);
+        tvHintText.setText(msgText);
+        btok.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                finish();
+                myDialog.dismiss();
+
+            }
+        });
+
+        myDialog.show();
+        myDialog.setCancelable(false);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1160,7 +1422,8 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
             if(resultCode == AccountInfoActivity.RESULT_OK){
                 Bundle bundle=data.getExtras();
                 id =bundle.getString("id");
-                etBusName.setEnabled(false);
+                merchantType = bundle.getString("merchantType");
+//                etBusName.setEnabled(false);
                 Log.e("onActivityResult：",id);
             }
         }
@@ -1171,7 +1434,7 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
         Intent intent = null;
         switch (v.getId()){
             case R.id.basic_info_region:
-                if(Utils.isFastClick()){
+                if(Utils.isFastClick(Constant.INTERVAL500)){
                     return;
                 }
                 if(lsProvince!=null&&lsProvince.size()>=1){
@@ -1180,8 +1443,11 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                     getProvince();
                 }
                 break;
+            case R.id.basic_info_contacts_tvIdCardValidity://联系人证件有效期
+                setIdCardValidity();
+                break;
             case R.id.basic_info_industryType:
-                if(Utils.isFastClick()){
+                if(Utils.isFastClick(Constant.INTERVAL500)){
                     return;
                 }
                 if(lsOneIndustry!=null&&lsOneIndustry.size()>=1){
@@ -1191,14 +1457,42 @@ public class BasicInfoActivity extends BaseActivity implements View.OnClickListe
                 }
                 break;
             case R.id.basic_info_btNext:
-                if(Utils.isFastClick()){
+                if(Utils.isFastClick(Constant.INTERVAL500)){
                     return;
                 }
                 subTextVerification();
+                break;
+            default:
                 break;
         }
     }
 
 
-
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(buttonView.getId() == R.id.basic_info_contacts_cbIdCardValidity){
+            if(isChecked){
+                Log.e("证件有效期","选中");
+                cb_IdCardValidity = "Y";
+                tvIdCardValidity.setClickable(false);
+                tvIdCardValidity.setText("");
+            }else{
+                cb_IdCardValidity = "N";
+                Log.e("证件有效期","未选中");
+                tvIdCardValidity.setClickable(true);
+                if(bus!=null){
+                    String person_id_expireStr = bus.getPerson_id_expire();
+                    if(Utils.isNotEmpty(person_id_expireStr)){
+                        Long person_id_expireLong = Long.parseLong(person_id_expireStr);
+                        String person_id_expire = DateTimeUtil.stampToFormatDate(person_id_expireLong,"yyyy-MM-dd");
+                        tvIdCardValidity.setText(person_id_expire);
+                    }else{
+                        tvIdCardValidity.setText(pickerStartDateTime.split(" ")[0]);
+                    }
+                }else{
+                    tvIdCardValidity.setText(pickerStartDateTime.split(" ")[0]);
+                }
+            }
+        }
+    }
 }

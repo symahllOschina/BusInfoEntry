@@ -102,17 +102,8 @@
             android:windowSoftInputMode="adjustPan"
             android:launchMode="standard"
             ></activity>
-        <!--版本号信息 -->
         <activity
             android:name=".activity.AboutUsActivity"
-            android:configChanges="orientation|mcc|mnc|keyboard|keyboardHidden|locale|touchscreen|navigation|fontScale"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"
-            android:launchMode="standard"
-            ></activity>
-        <!--查看原图 -->
-        <activity
-            android:name=".activity.SeeOriginalImgActivity"
             android:configChanges="orientation|mcc|mnc|keyboard|keyboardHidden|locale|touchscreen|navigation|fontScale"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"

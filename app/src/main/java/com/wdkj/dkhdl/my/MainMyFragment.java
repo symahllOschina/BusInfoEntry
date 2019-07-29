@@ -136,9 +136,6 @@ public class MainMyFragment extends BaseFragment implements View.OnClickListener
             case R.id.main_fragment_my_aboutUsLayout:
                 startActivity(new Intent(getActivity(), AboutUsActivity.class));
                 break;
-            default:
-
-                break;
         }
     }
 }

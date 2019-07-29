@@ -59,12 +59,11 @@ public class IndustryTypeAdapter extends BaseAdapter{
         }
 
         //选中和没选中时，设置不同的颜色
-//        if (position == selectedPosition){
-//            convertView.setBackgroundResource(R.color.popup_right_bg);
-//        }
-//        else{
-//            convertView.setBackgroundResource(R.drawable.selector_left_normal);
-//        }
+        if (position == selectedPosition){
+            convertView.setBackgroundResource(R.color.popup_right_bg);
+        }else{
+            convertView.setBackgroundResource(R.drawable.selector_left_normal);
+        }
 
         holder.nameTV.setText(list.get(position).getName());
         //判断是否有子集

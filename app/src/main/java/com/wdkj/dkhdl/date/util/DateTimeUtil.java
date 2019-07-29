@@ -268,7 +268,7 @@ public class DateTimeUtil {
 
 		String nextSecondDate = "";
 
-		if (currentDate != null && !"".equals(currentDate)) {
+		if (currentDate != null && !currentDate.equals("")) {
 
 			try {
 				Date date = format.parse(currentDate); // 将当前时间格式化

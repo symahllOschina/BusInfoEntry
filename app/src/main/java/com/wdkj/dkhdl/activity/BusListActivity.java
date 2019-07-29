@@ -89,7 +89,7 @@ public class BusListActivity extends BaseActivity implements XListView.IXListVie
     }
 
     private void getBusList(final int pageNum,final int pageCount){
-        if(!"1".equals(loadMore)){
+        if(!loadMore.equals("1")){
             showWaitDialog();
         }
         final String url = NitConfig.getBusList;
@@ -183,9 +183,6 @@ public class BusListActivity extends BaseActivity implements XListView.IXListVie
                     ToastUtil.showText(context,errorJsonText,1);
                     hideWaitDialog();
                     break;
-                default:
-
-                    break;
             }
         }
     };
@@ -246,7 +243,6 @@ public class BusListActivity extends BaseActivity implements XListView.IXListVie
 
         } catch (JSONException e) {
             e.printStackTrace();
-            ToastUtil.showText(context,"获取数据失败！",1);
         }
         loadMore = "0";
     }

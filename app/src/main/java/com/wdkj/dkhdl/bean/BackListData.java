@@ -12,10 +12,9 @@ public class BackListData implements Serializable{
     private String idno;// "103",
     private String bank_no;//: "103100000026",
     private String bank_name;//: "中国农业银行",
-    private String city_code;//: "石家庄市",
+    private Integer city_code;//: null,
     private String address;//: null,
-    private String province_code;//: "河北省"
-    private String head_bank;//"国家开发银行"
+    private Integer post_code;//: null
 
 
     public BackListData() {
@@ -61,11 +60,11 @@ public class BackListData implements Serializable{
         this.bank_name = bank_name;
     }
 
-    public String getCity_code() {
+    public Integer getCity_code() {
         return city_code;
     }
 
-    public void setCity_code(String city_code) {
+    public void setCity_code(Integer city_code) {
         this.city_code = city_code;
     }
 
@@ -77,19 +76,11 @@ public class BackListData implements Serializable{
         this.address = address;
     }
 
-    public String getProvince_code() {
-        return province_code;
+    public Integer getPost_code() {
+        return post_code;
     }
 
-    public void setProvince_code(String province_code) {
-        this.province_code = province_code;
-    }
-
-    public String getHead_bank() {
-        return head_bank;
-    }
-
-    public void setHead_bank(String head_bank) {
-        this.head_bank = head_bank;
+    public void setPost_code(Integer post_code) {
+        this.post_code = post_code;
     }
 }

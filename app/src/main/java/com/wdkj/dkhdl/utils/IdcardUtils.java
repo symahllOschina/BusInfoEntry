@@ -138,9 +138,8 @@ public class IdcardUtils {
                 e.printStackTrace();
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null) {
+            if (birthDate != null)
                 cal.setTime(birthDate);
-            }
             // 获取出生年(完全表现形式,如：2010)
             String sYear = String.valueOf(cal.get(Calendar.YEAR));
             idCard18 = idCard.substring(0, 6) + sYear + idCard.substring(8);
@@ -232,9 +231,8 @@ public class IdcardUtils {
                 e.printStackTrace();
             }
             Calendar cal = Calendar.getInstance();
-            if (birthDate != null) {
+            if (birthDate != null)
                 cal.setTime(birthDate);
-            }
             if (!valiDate(cal.get(Calendar.YEAR), Integer.valueOf(birthCode.substring(2, 4)),
                     Integer.valueOf(birthCode.substring(4, 6)))) {
                 return false;
@@ -299,7 +297,7 @@ public class IdcardUtils {
             sum = sum + Integer.valueOf(c + "") * iflag;
             iflag--;
         }
-        if ("A".equals(end.toUpperCase())) {
+        if (end.toUpperCase().equals("A")) {
             sum = sum + 10;
         } else {
             sum = sum + Integer.valueOf(end);
@@ -389,9 +387,6 @@ public class IdcardUtils {
         case 0:
             sCode = "1";
             break;
-            default:
-
-                break;
         }
         return sCode;
     }

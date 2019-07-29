@@ -20,7 +20,6 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.wdkj.dkhdl.BaseActivity;
-import com.wdkj.dkhdl.Constant;
 import com.wdkj.dkhdl.R;
 import com.wdkj.dkhdl.adapter.SearchBankAdapter;
 import com.wdkj.dkhdl.adapter.SpinnerBankAdapter;
@@ -65,7 +64,6 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
 
 
     private int id;//总行Id
-    private int provice_id;//省ID
     private int city_id;//城市ID
 
     private List<BackListData> lsBranch = new ArrayList<>();
@@ -77,7 +75,6 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
         super.onCreate(savedInstanceState);
         context = SearchBankActivity.this;
         id = getIntent().getIntExtra("id",0);
-        provice_id = getIntent().getIntExtra("provice_id",0);
         city_id = getIntent().getIntExtra("city_id",0);
 
         initListener();
@@ -106,7 +103,6 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
                     // 拼装JSON数据，向服务端发起请求
                     JSONObject userJSON = new JSONObject();
                     userJSON.put("id", String.valueOf(id));
-                    userJSON.put("bank_provice_code", String.valueOf(provice_id));
                     userJSON.put("bank_city_code", String.valueOf(city_id));
                     userJSON.put("bank_name", bankName);
                     String content = String.valueOf(userJSON);
@@ -170,9 +166,6 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
                     ToastUtil.showText(context,errorJsonText,1);
                     hideWaitDialog();
                     break;
-                default:
-
-                    break;
             }
         }
     };
@@ -226,14 +219,11 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
                 finish();
                 break;
             case R.id.search_header_tvSearch:
-                if(Utils.isFastClick(Constant.INTERVAL500)){
+                if(Utils.isFastClick()){
                     return;
                 }
                 String bankName = etSearch.getText().toString().trim();
                 getBranchList(bankName);
-                break;
-            default:
-
                 break;
         }
     }
@@ -256,8 +246,6 @@ public class SearchBankActivity extends BaseActivity implements OnClickListener,
                 in.putExtra("branch",branch);
                 setResult(RESULT_CODE,in);
                 finish();
-                break;
-            default:
 
                 break;
         }

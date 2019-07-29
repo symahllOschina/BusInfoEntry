@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">有氧金融</string>
+    <string name="app_name">鼎力伙伴</string>
 
     <string name="login_etuser_hint">请输入用户名</string>
     <string name="login_etpasswd_hint">请输入密码</string>

@@ -58,11 +58,11 @@ public class RegionAdapter extends BaseAdapter{
         }
 
         //选中和没选中时，设置不同的颜色
-//        if (position == selectedPosition){
-//            convertView.setBackgroundResource(R.color.popup_right_bg);
-//        }else{
-//            convertView.setBackgroundResource(R.drawable.selector_left_normal);
-//        }
+        if (position == selectedPosition){
+            convertView.setBackgroundResource(R.color.popup_right_bg);
+        }else{
+            convertView.setBackgroundResource(R.drawable.selector_left_normal);
+        }
 
         holder.nameTV.setText(list.get(position).getFullname());
         //判断是否有子集
@@ -71,7 +71,7 @@ public class RegionAdapter extends BaseAdapter{
 //        } else {
 //            holder.nameTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 //        }
-//        holder.nameTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.arrow_right, 0);
+        holder.nameTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.arrow_right, 0);
 
         return convertView;
     }
